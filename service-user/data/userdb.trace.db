@@ -1,0 +1,12 @@
+2026-06-27 22:09:45.513112+07:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "create table [*]user (user_id uuid not null, created_at timestamp(6), email varchar(255), is_active boolean, nama_belakang varchar(255) not null, nama_depan varchar(255) not null, password varchar(255) not null, role varchar(255) not null, updated_at timestamp(6), primary key (user_id))"; expected "identifier"; SQL statement:
+create table user (user_id uuid not null, created_at timestamp(6), email varchar(255), is_active boolean, nama_belakang varchar(255) not null, nama_depan varchar(255) not null, password varchar(255) not null, role varchar(255) not null, updated_at timestamp(6), primary key (user_id)) [42001-240]
+2026-06-27 22:09:45.520357+07:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "alter table if exists [*]user drop constraint if exists UKob8kqyqqgmefl0aco34akdtpe"; expected "identifier"; SQL statement:
+alter table if exists user drop constraint if exists UKob8kqyqqgmefl0aco34akdtpe [42001-240]
+2026-06-27 22:09:45.520357+07:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "alter table if exists [*]user add constraint UKob8kqyqqgmefl0aco34akdtpe unique (email)"; expected "identifier"; SQL statement:
+alter table if exists user add constraint UKob8kqyqqgmefl0aco34akdtpe unique (email) [42001-240]
+2026-06-27 22:10:52.440182+07:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "select u1_0.user_id,u1_0.created_at,u1_0.email,u1_0.is_active,u1_0.nama_belakang,u1_0.nama_depan,u1_0.password,u1_0.role,u1_0.updated_at from [*]user u1_0 where u1_0.email=?"; expected "identifier"; SQL statement:
+select u1_0.user_id,u1_0.created_at,u1_0.email,u1_0.is_active,u1_0.nama_belakang,u1_0.nama_depan,u1_0.password,u1_0.role,u1_0.updated_at from user u1_0 where u1_0.email=? [42001-240]

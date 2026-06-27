@@ -1,26 +1,38 @@
 package com.sistemkasir.userservice.controller;
 
-import org.springframework.stereotype.Controller;
+import java.util.UUID;
+
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import com.sistemkasir.userservice.model.User;
+import com.sistemkasir.userservice.dto.LoginUserDTO;
+import com.sistemkasir.userservice.dto.RegisterUserDTO;
+import com.sistemkasir.userservice.dto.UserResponseDTO;
+import com.sistemkasir.userservice.service.UserService;
 
-@Controller
+@RestController
 @RequestMapping("/api")
 public class UserController {
+    private final UserService userService;
+
+    public UserController(UserService userService){
+        this.userService = userService;
+    }
+
     @PostMapping("/auth/register")
-    public String registerUser(@RequestBody User user){
-        return "tes register";
+    public UserResponseDTO registerUser(@RequestBody RegisterUserDTO userRegister){
+        return userService.register(userRegister);
     }
     @PostMapping("/auth/login")
-    public String loginUser(@RequestBody User user){
-        return "tes login";
+    public String loginUser(@RequestBody LoginUserDTO loginUser){
+        return userService.login(loginUser);
     }
     @GetMapping("/users/{id}")
-    public String getUser(String id){
-        return "tes get user";
+    public UserResponseDTO getUser(@PathVariable UUID id){
+        return userService.getUserById(id);
     }
 }

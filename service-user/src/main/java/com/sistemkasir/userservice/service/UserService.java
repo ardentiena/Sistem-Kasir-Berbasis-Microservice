@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.sistemkasir.userservice.config.JwtUtil;
@@ -60,16 +62,13 @@ public class UserService {
     }
 
     public String login(LoginUserDTO userLogin){
-        Optional<User> userEmail = userRepository.findByEmail(userLogin.getEmail());
-        if(userEmail.isEmpty()){
-            throw new RuntimeException("Email tidak ditemukan");
-        }
+        Optional<User> user = findUserByEmail(userLogin.getEmail());
         // cek jika password sama dengan di database
-        if(!passwordEncoder.matches(userLogin.getPassword(), userEmail.get().getPassword())){
+        if(!passwordEncoder.matches(userLogin.getPassword(), user.get().getPassword())){
             throw new RuntimeException("Password salah");
         }
         // return jwt key yang digenerate
-        return jwtUtil.generateToken(userEmail.get());
+        return jwtUtil.generateToken(user.get());
     }
 
     public List<UserResponseDTO> getAllUser(){
@@ -97,9 +96,15 @@ public class UserService {
     }
 
     public UserResponseDTO getUserById(UUID id){
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        
         // cari user berdasarkan id dan simpan ke userId
-       // Optional itu untuk jaga-jaga kalau datanya tidak ada
+        // Optional itu untuk jaga-jaga kalau datanya tidak ada
         Optional<User> userId = findUserById(id);
+        Optional<User> userEmail = findUserByEmail(email);
+        if(!userEmail.get().getUserId().equals(userId.get().getUserId()) && !userEmail.get().getRole().equals("ADMIN")){
+            throw new AccessDeniedException("You have no permission!");
+        }
         // ini supaya tidak perlu userId.get() satu-satu lagi
         User user = userId.get();
 
@@ -150,6 +155,14 @@ public class UserService {
         Optional<User> user = userRepository.findById(id);
         if(user.isEmpty()){
             throw new RuntimeException("User tidak ditemukan");
+        }
+        return user;
+    }
+
+    private Optional<User> findUserByEmail(String email){
+        Optional<User> user = userRepository.findByEmail(email);
+        if(user.isEmpty()){
+            throw new RuntimeException("Email tidak ditemukan");
         }
         return user;
     }

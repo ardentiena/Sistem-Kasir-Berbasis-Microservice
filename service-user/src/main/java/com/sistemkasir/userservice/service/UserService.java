@@ -62,13 +62,13 @@ public class UserService {
     }
 
     public String login(LoginUserDTO userLogin){
-        Optional<User> user = findUserByEmail(userLogin.getEmail());
+        User user = findUserByEmail(userLogin.getEmail());
         // cek jika password sama dengan di database
-        if(!passwordEncoder.matches(userLogin.getPassword(), user.get().getPassword())){
+        if(!passwordEncoder.matches(userLogin.getPassword(), user.getPassword())){
             throw new RuntimeException("Password salah");
         }
         // return jwt key yang digenerate
-        return jwtUtil.generateToken(user.get());
+        return jwtUtil.generateToken(user);
     }
 
     public List<UserResponseDTO> getAllUser(){
@@ -99,32 +99,27 @@ public class UserService {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         
         // cari user berdasarkan id dan simpan ke userId
-        // Optional itu untuk jaga-jaga kalau datanya tidak ada
-        Optional<User> userId = findUserById(id);
-        Optional<User> userEmail = findUserByEmail(email);
-        if(!userEmail.get().getUserId().equals(userId.get().getUserId()) && !userEmail.get().getRole().equals("ADMIN")){
+        User userId = findUserById(id);
+        User userEmail = findUserByEmail(email);
+        if(!userEmail.getUserId().equals(userId.getUserId()) && !userEmail.getRole().equals("ADMIN")){
             throw new AccessDeniedException("You have no permission!");
         }
-        // ini supaya tidak perlu userId.get() satu-satu lagi
-        User user = userId.get();
 
         return new UserResponseDTO(
-            user.getUserId(),
-            user.getRole(), 
-            user.getNamaDepan(), 
-            user.getNamaBelakang(), 
-            user.getEmail(),
-            user.getIsActive(),
-            user.getCreatedAt(),
-            user.getUpdatedAt()
+            userId.getUserId(),
+            userId.getRole(), 
+            userId.getNamaDepan(), 
+            userId.getNamaBelakang(), 
+            userId.getEmail(),
+            userId.getIsActive(),
+            userId.getCreatedAt(),
+            userId.getUpdatedAt()
         );
     }
 
     public UserResponseDTO updateUser(UUID id, UserRequestDTO updateUserRequest){
         // simpan data user ke userId
-        Optional<User> userId = findUserById(id);
-        // set data user tadi ke data yang baru
-        User user = userId.get();
+        User user = findUserById(id);
         user.setRole(updateUserRequest.getRole());
         user.setNamaDepan(updateUserRequest.getNamaDepan());
         user.setNamaBelakang(updateUserRequest.getNamaBelakang());
@@ -145,25 +140,18 @@ public class UserService {
     }
 
     public String deleteUser(UUID id){
-        Optional<User> user = findUserById(id);
-        User existingUser = user.get();
-        userRepository.delete(existingUser);
+        User user = findUserById(id);
+        userRepository.delete(user);
         return "User berhasil dihapus";
     }
 
-    private Optional<User> findUserById(UUID id){
-        Optional<User> user = userRepository.findById(id);
-        if(user.isEmpty()){
-            throw new RuntimeException("User tidak ditemukan");
-        }
+    private User findUserById(UUID id){
+        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
         return user;
     }
 
-    private Optional<User> findUserByEmail(String email){
-        Optional<User> user = userRepository.findByEmail(email);
-        if(user.isEmpty()){
-            throw new RuntimeException("Email tidak ditemukan");
-        }
+    private User findUserByEmail(String email){
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Email tidak ditemukan"));
         return user;
     }
 }

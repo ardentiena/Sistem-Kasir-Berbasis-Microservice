@@ -24,7 +24,7 @@ public class ProdukService {
 
         List<ProdukResponseDTO> produkResponseList = new ArrayList<>(); 
         for (Produk produk : produkList) {
-            ProdukResponseDTO dto = new ProdukResponseDTO(
+            ProdukResponseDTO productResponse = new ProdukResponseDTO(
                 produk.getId(),
                 produk.getNamaProduk(),
                 produk.getKategori(),
@@ -33,7 +33,7 @@ public class ProdukService {
                 produk.getCreatedAt(),
                 produk.getUpdatedAt()
             );
-            produkResponseList.add(dto);
+            produkResponseList.add(productResponse);
         }
         return produkResponseList;
     }
@@ -43,7 +43,7 @@ public class ProdukService {
 
         List<ProdukResponseDTO> produkResponseList = new ArrayList<>(); 
         for (Produk produk : produkList) {
-            ProdukResponseDTO dto = new ProdukResponseDTO(
+            ProdukResponseDTO productResponse = new ProdukResponseDTO(
                 produk.getId(),
                 produk.getNamaProduk(),
                 produk.getKategori(),
@@ -52,7 +52,7 @@ public class ProdukService {
                 produk.getCreatedAt(),
                 produk.getUpdatedAt()
             );
-            produkResponseList.add(dto);
+            produkResponseList.add(productResponse);
         }
         return produkResponseList;
     }

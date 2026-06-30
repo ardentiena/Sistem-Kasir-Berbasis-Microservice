@@ -29,18 +29,22 @@ public class JwtAuthFilter extends OncePerRequestFilter{
     ) throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
         
-        if(authHeader != null && authHeader.startsWith("Bearer")){
+        if(authHeader != null && authHeader.startsWith("Bearer ")){
             String token = authHeader.substring(7);
             boolean isValid = jwtUtil.validateToken(token);
-            if(isValid){
-                String email = jwtUtil.getEmailFromToken(token);
-                String role = jwtUtil.getRoleFromToken(token);
-                List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                    email, null, authorities
-                );
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+            if(!isValid){
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"message\": \"Unauthorized\"}");
+                return;
             }
+            String email = jwtUtil.getEmailFromToken(token);
+            String role = jwtUtil.getRoleFromToken(token);
+            List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
+            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                email, null, authorities
+            );
+            SecurityContextHolder.getContext().setAuthentication(authToken);
         }
         filterChain.doFilter(request, response);
     }

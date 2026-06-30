@@ -62,13 +62,13 @@ public class UserService {
     }
 
     public String login(LoginUserDTO userLogin){
-        Optional<User> user = findUserByEmail(userLogin.getEmail());
+        User user = findUserByEmail(userLogin.getEmail());
         // cek jika password sama dengan di database
-        if(!passwordEncoder.matches(userLogin.getPassword(), user.get().getPassword())){
+        if(!passwordEncoder.matches(userLogin.getPassword(), user.getPassword())){
             throw new RuntimeException("Password salah");
         }
         // return jwt key yang digenerate
-        return jwtUtil.generateToken(user.get());
+        return jwtUtil.generateToken(user);
     }
 
     public List<UserResponseDTO> getAllUser(){
@@ -101,8 +101,8 @@ public class UserService {
         // cari user berdasarkan id dan simpan ke userId
         // Optional itu untuk jaga-jaga kalau datanya tidak ada
         Optional<User> userId = findUserById(id);
-        Optional<User> userEmail = findUserByEmail(email);
-        if(!userEmail.get().getUserId().equals(userId.get().getUserId()) && !userEmail.get().getRole().equals("ADMIN")){
+        User userEmail = findUserByEmail(email);
+        if(!userEmail.getUserId().equals(userId.get().getUserId()) && !userEmail.getRole().equals("ADMIN")){
             throw new AccessDeniedException("You have no permission!");
         }
         // ini supaya tidak perlu userId.get() satu-satu lagi
@@ -159,11 +159,8 @@ public class UserService {
         return user;
     }
 
-    private Optional<User> findUserByEmail(String email){
-        Optional<User> user = userRepository.findByEmail(email);
-        if(user.isEmpty()){
-            throw new RuntimeException("Email tidak ditemukan");
-        }
+    private User findUserByEmail(String email){
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Email tidak ditemukan"));
         return user;
     }
 }

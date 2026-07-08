@@ -3,7 +3,7 @@ package com.sistemkasir.transaksi_jual.repository;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
-import com.sistemkasir.transaksi_jual.entity.DetailTransaksi;
+import com.sistemkasir.transaksi_jual.model.DetailTransaksi;
 
 public interface DetailTransaksiRepository
         extends JpaRepository<DetailTransaksi, UUID> {

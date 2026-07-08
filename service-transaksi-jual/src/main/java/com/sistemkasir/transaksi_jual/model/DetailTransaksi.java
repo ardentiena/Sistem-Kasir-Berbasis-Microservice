@@ -1,4 +1,4 @@
-package com.sistemkasir.transaksi_jual.entity;
+package com.sistemkasir.transaksi_jual.model;
 
 import java.util.UUID;
 

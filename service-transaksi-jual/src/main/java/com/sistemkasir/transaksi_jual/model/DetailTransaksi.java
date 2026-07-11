@@ -1,23 +1,40 @@
 package com.sistemkasir.transaksi_jual.model;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.UuidGenerator;
 
 @Entity
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Table(name = "detail_transaksi")
 public class DetailTransaksi {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @UuidGenerator
     private UUID id;
-    private UUID transaksiId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_transaksi", referencedColumnName = "id", nullable = false)
+    private Transaksi transaksi;
+
+    @Column(name = "id_produk", nullable = false)
     private UUID produkId;
+
+    @Column(name = "nama_produk", nullable = false)
     private String namaProduk;
-    private double harga;
+
+    @Column(name = "harga", nullable = false)
+    private BigDecimal harga;
+
+    @Column(name = "jumlah", nullable = false)
     private int jumlah;
-    private double subtotal;
+
+    @Column(name = "subtotal",  nullable = false)
+    private BigDecimal subtotal;
 }

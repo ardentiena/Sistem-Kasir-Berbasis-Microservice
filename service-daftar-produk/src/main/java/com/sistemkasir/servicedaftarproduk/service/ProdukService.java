@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 
 import com.sistemkasir.servicedaftarproduk.dto.ProdukRequestDTO;
@@ -22,26 +23,18 @@ public class ProdukService {
     public List<ProdukResponseDTO> getAllProduk(){
         List<Produk> produkList = produkRepository.findAll();
 
-        List<ProdukResponseDTO> produkResponseList = new ArrayList<>(); 
-        for (Produk produk : produkList) {
-            ProdukResponseDTO productResponse = new ProdukResponseDTO(
-                produk.getId(),
-                produk.getNamaProduk(),
-                produk.getKategori(),
-                produk.getHarga(),
-                produk.getStok(),
-                produk.getCreatedAt(),
-                produk.getUpdatedAt()
-            );
-            produkResponseList.add(productResponse);
-        }
-        return produkResponseList;
+        return getProdukResponseDTOS(produkList);
     }
 
     public List<ProdukResponseDTO> findProdukByName(String namaProduk){
         List<Produk> produkList = produkRepository.findByNamaProdukContaining(namaProduk);
 
-        List<ProdukResponseDTO> produkResponseList = new ArrayList<>(); 
+        return getProdukResponseDTOS(produkList);
+    }
+
+    @NonNull
+    private List<ProdukResponseDTO> getProdukResponseDTOS(List<Produk> produkList) {
+        List<ProdukResponseDTO> produkResponseList = new ArrayList<>();
         for (Produk produk : produkList) {
             ProdukResponseDTO productResponse = new ProdukResponseDTO(
                 produk.getId(),
@@ -59,6 +52,11 @@ public class ProdukService {
 
     public ProdukResponseDTO addNewProduk(ProdukRequestDTO produkRequest){
         Produk newProduk = new Produk();
+        return getProdukResponseDTO(produkRequest, newProduk);
+    }
+
+    @NonNull
+    private ProdukResponseDTO getProdukResponseDTO(ProdukRequestDTO produkRequest, Produk newProduk) {
         newProduk.setNamaProduk(produkRequest.getNamaProduk());
         newProduk.setKategori(produkRequest.getKategori());
         newProduk.setHarga(produkRequest.getHarga());
@@ -82,21 +80,7 @@ public class ProdukService {
             throw new RuntimeException("Produk tidak ditemukan");
         }
         Produk updatedProduk = produk.get();
-        updatedProduk.setNamaProduk(updateProdukRequest.getNamaProduk());
-        updatedProduk.setKategori(updateProdukRequest.getKategori());
-        updatedProduk.setHarga(updateProdukRequest.getHarga());
-        updatedProduk.setStok(updateProdukRequest.getStok());
-        produkRepository.save(updatedProduk);
-
-        return new ProdukResponseDTO(
-            updatedProduk.getId(),
-            updatedProduk.getNamaProduk(),
-            updatedProduk.getKategori(),
-            updatedProduk.getHarga(),
-            updatedProduk.getStok(),
-            updatedProduk.getCreatedAt(),
-            updatedProduk.getUpdatedAt()
-        );
+        return getProdukResponseDTO(updateProdukRequest, updatedProduk);
     }
 
     public String deleteProduk(UUID id){

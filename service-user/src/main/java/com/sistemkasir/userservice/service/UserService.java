@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import lombok.AllArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.access.AccessDeniedException;
@@ -19,16 +20,11 @@ import com.sistemkasir.userservice.model.User;
 import com.sistemkasir.userservice.repository.UserRepository;
 
 @Service
+@AllArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
-
-    public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, JwtUtil jwtUtil){
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.jwtUtil = jwtUtil;
-    }
 
     public UserResponseDTO register(RegisterUserDTO userRegister){
        // cari user berdasarkan email dan simpan ke registerEmail
@@ -100,7 +96,7 @@ public class UserService {
         
         // cari user berdasarkan id dan simpan ke userId
         User userId = findUserById(id);
-        User userEmail = findUserByEmail(email);
+        User userEmail = findUserByEmail(email);    
         if(!userEmail.getUserId().equals(userId.getUserId()) && !userEmail.getRole().equals("ADMIN")){
             throw new AccessDeniedException("You have no permission!");
         }

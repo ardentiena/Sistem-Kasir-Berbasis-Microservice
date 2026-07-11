@@ -6,17 +6,19 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
+import com.sistemkasir.servicepembayaran.enumeration.Status;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Component
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ResponsePembayaran{
-    private UUID idPembayaran;
-    private Date waktuPembayaran;
-    private BigDecimal jumlahBayar;
-    private BigDecimal kembalian;
+public class ResponseDetailPembayaranDTO {
+    private UUID idDetailPembayaran;
+    private UUID idTransaksi;
+    private BigDecimal grandTotal;
+    private Status status;
+    private Date createdAt;
 }

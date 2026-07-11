@@ -5,8 +5,6 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import com.sistemkasir.transaksi_jual.model.DetailTransaksi;
 
-public interface DetailTransaksiRepository
-        extends JpaRepository<DetailTransaksi, UUID> {
-
+public interface DetailTransaksiRepository extends JpaRepository<DetailTransaksi, UUID> {
     List<DetailTransaksi> findByTransaksiId(UUID transaksiId);
 }

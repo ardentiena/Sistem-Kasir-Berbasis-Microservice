@@ -1,6 +1,7 @@
 package com.sistemkasir.transaksi_jual.service;
 
 import com.sistemkasir.transaksi_jual.config.DaftarProdukClient;
+import com.sistemkasir.transaksi_jual.config.PembayaranClient;
 import com.sistemkasir.transaksi_jual.dto.*;
 import com.sistemkasir.transaksi_jual.enumeration.Status;
 import com.sistemkasir.transaksi_jual.model.DetailTransaksi;
@@ -24,6 +25,7 @@ public class TransaksiService {
     private final TransaksiRepository transaksiRepository;
     private final DetailTransaksiRepository detailTransaksiRepository;
     private final DaftarProdukClient daftarProdukClient;
+    private final PembayaranClient pembayaranClient;
 
     public TransaksiResponseDTO findTransaksiById(UUID id){
         String email = Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getName();
@@ -103,8 +105,9 @@ public class TransaksiService {
         transaksiRepository.save(transaksi);
     }
 
-    public ResponseDetailPembayaranDTO createTransaksi(TransaksiRequestDTO transaksiRequestDTO){
-        // list id produk yang direquest
+    public TransaksiResponseDTO createTransaksi(TransaksiRequestDTO transaksiRequestDTO){
+        String kasirEmail = Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getName();
+
         List<UUID> listRequestIdProduk = transaksiRequestDTO.getProdukList()
                 .stream().map(ProdukRequestDTO::getProdukId).toList();
 
@@ -117,26 +120,53 @@ public class TransaksiService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, daftarProduk.getMessage());
         }
 
-        BigDecimal subtotal = BigDecimal.ZERO;
+        BigDecimal grandTotal = BigDecimal.ZERO;
         List<DetailTransaksi> listDetailTransaksi = new ArrayList<>();
-        for(ProdukRequestDTO eachProduk : transaksiRequestDTO.getProdukList()){
+
+        for (ProdukRequestDTO eachProduk : transaksiRequestDTO.getProdukList()) {
             ProdukResponseDTO produk = daftarProduk.getProduk().stream()
-                    .filter(produkInit -> produkInit.getId().equals(eachProduk.getProdukId()))
+                    .filter(p -> p.getId().equals(eachProduk.getProdukId()))
                     .findFirst()
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produk tidak ditemukan"));
 
-            subtotal.add(produk.getHarga().multiply(BigDecimal.valueOf(eachProduk.getJumlah())));
-            DetailTransaksi  detailTransaksi = new DetailTransaksi();
+            BigDecimal subtotalItem = produk.getHarga().multiply(BigDecimal.valueOf(eachProduk.getJumlah()));
+            grandTotal = grandTotal.add(subtotalItem);
+
+            DetailTransaksi detailTransaksi = new DetailTransaksi();
             detailTransaksi.setProdukId(eachProduk.getProdukId());
             detailTransaksi.setNamaProduk(produk.getNamaProduk());
             detailTransaksi.setHarga(produk.getHarga());
             detailTransaksi.setJumlah(eachProduk.getJumlah());
-            detailTransaksi.setSubtotal(subtotal);
+            detailTransaksi.setSubtotal(subtotalItem);
             listDetailTransaksi.add(detailTransaksi);
+        }
+
+        UUID transaksiId = UUID.randomUUID();
+
+        PembayaranRequestDTO requestPembayaran = new PembayaranRequestDTO(transaksiId, grandTotal);
+        ResponseDetailPembayaranDTO responsePembayaran = pembayaranClient.buatPembayaran(requestPembayaran);
+
+        Transaksi transaksi = new Transaksi();
+        transaksi.setId(transaksiId);
+        transaksi.setKasirEmail(kasirEmail);
+        transaksi.setGrandTotal(grandTotal);
+        transaksi.setStatus(Status.PENDING);
+        transaksi.setIdPembayaran(responsePembayaran.getIdPembayaran());
+        transaksi = transaksiRepository.save(transaksi);
+
+        for (DetailTransaksi detailTransaksi : listDetailTransaksi) {
+            detailTransaksi.setTransaksi(transaksi);
             detailTransaksiRepository.save(detailTransaksi);
         }
-        Transaksi transaksi = new Transaksi();
-        transaksi.setDetailTransaksi(listDetailTransaksi);
-        return new ResponseDetailPembayaranDTO(transaksi.getId());
+
+        List<DetailTransaksiResponseDTO> detailResponse = getDetailTransaksiResponseDTOs(listDetailTransaksi);
+        return new TransaksiResponseDTO(
+                transaksi.getId(),
+                transaksi.getCreatedAt(),
+                transaksi.getKasirEmail(),
+                transaksi.getStatus(),
+                detailResponse,
+                transaksi.getGrandTotal()
+        );
     }
 }

@@ -20,10 +20,10 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.PATCH, "/api/transaction/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/transaction").hasAnyRole("KASIR", "ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/transaction").hasAnyRole("KASIR", "ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/transaction/**").hasAnyRole("KASIR", "ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/transactions/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/transactions").hasAnyRole("KASIR", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/transactions").hasAnyRole("KASIR", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/transactions/**").hasAnyRole("KASIR", "ADMIN")
                         .anyRequest().authenticated()
                 ).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();

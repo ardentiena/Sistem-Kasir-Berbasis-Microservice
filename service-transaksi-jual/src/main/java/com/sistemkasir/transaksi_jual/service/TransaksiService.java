@@ -112,7 +112,7 @@ public class TransaksiService {
                 .stream().map(ProdukRequestDTO::getProdukId).toList();
 
         BatchProdukRequestDTO batchProdukRequestDTO = new BatchProdukRequestDTO();
-        batchProdukRequestDTO.setProdukIds(listRequestIdProduk);
+        batchProdukRequestDTO.setIdProduk(listRequestIdProduk);
 
         BatchProdukResponseDTO daftarProduk = daftarProdukClient.getBatchDaftarProduk(batchProdukRequestDTO);
 
@@ -145,13 +145,14 @@ public class TransaksiService {
 
         PembayaranRequestDTO requestPembayaran = new PembayaranRequestDTO(transaksiId, grandTotal);
         ResponseDetailPembayaranDTO responsePembayaran = pembayaranClient.buatPembayaran(requestPembayaran);
+        System.out.println("DEBUG - responsePembayaran.getId(): " + responsePembayaran.getIdDetailPembayaran());
 
         Transaksi transaksi = new Transaksi();
         transaksi.setId(transaksiId);
         transaksi.setKasirEmail(kasirEmail);
         transaksi.setGrandTotal(grandTotal);
         transaksi.setStatus(Status.PENDING);
-        transaksi.setIdPembayaran(responsePembayaran.getIdPembayaran());
+        transaksi.setIdPembayaran(responsePembayaran.getIdDetailPembayaran());
         transaksi = transaksiRepository.save(transaksi);
 
         for (DetailTransaksi detailTransaksi : listDetailTransaksi) {

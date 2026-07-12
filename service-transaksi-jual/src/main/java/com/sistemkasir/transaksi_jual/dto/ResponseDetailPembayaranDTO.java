@@ -10,5 +10,5 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ResponseDetailPembayaranDTO {
-    private UUID idPembayaran;
+    private UUID idDetailPembayaran;
 }

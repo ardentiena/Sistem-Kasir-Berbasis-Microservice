@@ -31,6 +31,7 @@ public class PembayaranClient {
                     .bodyToMono(ResponseDetailPembayaranDTO.class)
                     .block();
         }catch (Exception e){
+            System.out.println("DEBUG - Error calling service: " + e.getMessage());
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Service unavailable");
         }
         return responseDetailPembayaran;

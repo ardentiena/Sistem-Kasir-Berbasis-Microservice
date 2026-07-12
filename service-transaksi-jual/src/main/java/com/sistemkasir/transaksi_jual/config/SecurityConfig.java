@@ -24,6 +24,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/transactions").hasAnyRole("KASIR", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/transactions").hasAnyRole("KASIR", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/transactions/**").hasAnyRole("KASIR", "ADMIN")
+                        .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated()
                 ).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();

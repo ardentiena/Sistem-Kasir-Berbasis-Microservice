@@ -31,6 +31,7 @@ public class DaftarProdukClient {
                     .bodyToMono(BatchProdukResponseDTO.class)
                     .block();
         }catch(Exception e){
+            System.out.println("DEBUG - Error calling service: " + e.getMessage());
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, e.getMessage());
         }
         return responseDTO;

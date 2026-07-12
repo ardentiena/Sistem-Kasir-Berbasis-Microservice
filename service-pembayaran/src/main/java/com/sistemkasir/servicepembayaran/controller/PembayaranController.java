@@ -23,7 +23,7 @@ public class PembayaranController {
     }
 
     @PostMapping("/{id}/paid")
-    public ResponseEntity<ResponsePembayaranDTO> createPembayaran(@PathVariable("id") UUID id, @RequestBody RequestPembayaranDTO dto){
+    public ResponseEntity<ResponsePembayaranDTO> createPembayaran(@PathVariable UUID id, @RequestBody RequestPembayaranDTO dto){
         return ResponseEntity.ok(pembayaranService.transaksiJualPayment(id, dto));
     }
 
@@ -38,7 +38,7 @@ public class PembayaranController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ResponseDetailPembayaranLengkapDTO> getPembayaranById(@PathVariable("id") UUID id){
+    public ResponseEntity<ResponseDetailPembayaranLengkapDTO> getPembayaranById(@PathVariable UUID id){
         return ResponseEntity.ok(pembayaranService.getDetailPembayaranById(id));
     }
 }

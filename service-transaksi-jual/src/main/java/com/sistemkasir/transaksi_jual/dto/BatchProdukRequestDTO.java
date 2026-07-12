@@ -11,5 +11,5 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BatchProdukRequestDTO {
-    private List<UUID> produkIds;
+    private List<UUID> idProduk;
 }

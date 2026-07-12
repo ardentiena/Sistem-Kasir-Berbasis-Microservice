@@ -7,7 +7,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 public class WebClientConfig {
-    @Value("${daftar-barang.host}")
+    @Value("${daftar-produk.host}")
     private String daftarBarangHost;
     @Value("${pembayaran.host}")
     private String pembayaranHost;

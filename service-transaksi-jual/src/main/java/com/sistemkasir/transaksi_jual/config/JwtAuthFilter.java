@@ -28,13 +28,16 @@ public class JwtAuthFilter extends OncePerRequestFilter{
             HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
+        System.out.println("DEBUG - authHeader: " + authHeader);
 
         if(authHeader != null && authHeader.startsWith("Bearer")){
             String token = authHeader.substring(7);
             boolean isValid = jwtUtil.validateToken(token);
+            System.out.println("DEBUG - isValid: " + isValid);
             if(isValid){
                 String email = jwtUtil.getEmailFromToken(token);
                 String role = jwtUtil.getRoleFromToken(token);
+                System.out.println("DEBUG - email: " + email + ", role: " + role);
                 List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         email, null, authorities

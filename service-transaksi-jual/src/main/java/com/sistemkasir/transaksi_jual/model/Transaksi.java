@@ -22,7 +22,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @EntityListeners(AuditingEntityListener.class)
 public class Transaksi {
     @Id
-    @UuidGenerator
     private UUID id;
 
     @Column(name = "kasir",  nullable = false)

@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import com.sistemkasir.servicedaftarproduk.dto.BatchProdukRequestDTO;
+import com.sistemkasir.servicedaftarproduk.dto.BatchProdukResponseDTO;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 
@@ -91,5 +94,26 @@ public class ProdukService {
         Produk existingProduk = produk.get();
         produkRepository.delete(existingProduk);
         return "Produk berhasil terhapus";
+    }
+
+    public BatchProdukResponseDTO batchProduk(BatchProdukRequestDTO batchProdukRequestDTO){
+        List<Produk> produkFound = produkRepository.findAllById(batchProdukRequestDTO.getIdProduk());
+        List<UUID> requestIds = batchProdukRequestDTO.getIdProduk();
+        List<UUID> idKetemu = produkFound.stream()
+                .map(Produk::getId)
+                .toList();
+        List<UUID> idTidakKetemu = requestIds.stream()
+                .filter(id -> !idKetemu.contains(id))
+                .toList();
+        String message = "";
+        if(idTidakKetemu.isEmpty())
+            message = idKetemu.size() + "/" + requestIds.size() + " ditemukan.";
+        else message = idKetemu.size() + "/" + requestIds.size() +
+                    " ditemukan." + idTidakKetemu.size() + " produk tidak ditemukan";
+        List<ProdukResponseDTO> produkResponseDTOS = getProdukResponseDTOS(produkFound);
+        return new BatchProdukResponseDTO(
+                produkResponseDTOS,
+                message
+        );
     }
 }

@@ -136,7 +136,7 @@ public class PembayaranService {
         );
     }
 
-    public boolean retryCallback(UUID idDetailPembayaran){
+    public void retryCallback(UUID idDetailPembayaran){
         DetailPembayaran detailPembayaran = detailPembayaranRepository.findById(idDetailPembayaran)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "detail tidak ditemukan!"));
         if(detailPembayaran.getStatus().equals(Status.PENDING)){
@@ -146,7 +146,6 @@ public class PembayaranService {
         if(!callback){
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "callback gagal. silahkan coba lagi!");
         }
-        return true;
     }
 
     private static @NonNull ResponseDetailPembayaranLengkapDTO getResponseDetailPembayaranLengkapDTO(DetailPembayaran detailPembayaran, Optional<Pembayaran> pembayaran) {

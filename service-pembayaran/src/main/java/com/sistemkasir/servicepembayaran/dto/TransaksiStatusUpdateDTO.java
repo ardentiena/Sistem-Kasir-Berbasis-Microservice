@@ -1,7 +1,5 @@
 package com.sistemkasir.servicepembayaran.dto;
 
-import org.springframework.stereotype.Component;
-
 import com.sistemkasir.servicepembayaran.enumeration.StatusUpdate;
 
 import lombok.AllArgsConstructor;

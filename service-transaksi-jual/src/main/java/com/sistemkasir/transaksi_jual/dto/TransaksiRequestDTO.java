@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TransaksiRequestDTO {
-    private List<ItemRequestDTO> items;
+    private List<ProdukRequestDTO> produkList;
 }

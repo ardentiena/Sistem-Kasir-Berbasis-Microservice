@@ -1,5 +1,6 @@
 package com.sistemkasir.servicedaftarproduk.model;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.UUID;
 
@@ -24,22 +25,27 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 public class Produk {
-    @Column
     @Id
     @UuidGenerator
     private UUID id;
-    @Column(nullable = false)
+
+    @Column(name = "nama_produk", nullable = false)
     private String namaProduk;
-    @Column(nullable = false)
+
+    @Column(name = "kategori", nullable = false)
     private String kategori;
-    @Column(nullable = false)
-    private double harga;
-    @Column(nullable = false)
+
+    @Column(name = "harga", nullable = false)
+    private BigDecimal harga;
+
+    @Column(name = "stok", nullable = false)
     private int stok;
-    @Column
+
+    @Column(name = "created_at", nullable = false)
     @CreatedDate
     private Date createdAt;
-    @Column
+
+    @Column(name = "updated_at", nullable = true)
     @LastModifiedDate
     private Date updatedAt;
 }

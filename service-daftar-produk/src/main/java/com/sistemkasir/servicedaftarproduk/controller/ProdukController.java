@@ -3,6 +3,8 @@ package com.sistemkasir.servicedaftarproduk.controller;
 import java.util.List;
 import java.util.UUID;
 
+import com.sistemkasir.servicedaftarproduk.dto.BatchProdukRequestDTO;
+import com.sistemkasir.servicedaftarproduk.dto.BatchProdukResponseDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -52,5 +54,10 @@ public class ProdukController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteProduk(@PathVariable UUID id){
         return ResponseEntity.status(HttpStatus.OK).body(produkService.deleteProduk(id));
+    }
+
+    @PostMapping("/batch")
+    public ResponseEntity<BatchProdukResponseDTO> getBatchProduk(@RequestBody BatchProdukRequestDTO batchProdukRequestDTO){
+        return ResponseEntity.ok(produkService.batchProduk(batchProdukRequestDTO));
     }
 }

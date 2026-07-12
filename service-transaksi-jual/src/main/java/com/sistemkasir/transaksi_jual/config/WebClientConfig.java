@@ -11,11 +11,14 @@ public class WebClientConfig {
     private String daftarBarangHost;
     @Value("${pembayaran.host}")
     private String pembayaranHost;
+    @Value("${internal.api.key}")
+    private String internalApiKey;
 
     @Bean(name = "webClientDaftarProduk")
     public WebClient webClientDaftarProduk() {
         return WebClient.builder()
                 .baseUrl(daftarBarangHost)
+                .defaultHeader("Internal-Api-Key", internalApiKey)
                 .build();
     }
 

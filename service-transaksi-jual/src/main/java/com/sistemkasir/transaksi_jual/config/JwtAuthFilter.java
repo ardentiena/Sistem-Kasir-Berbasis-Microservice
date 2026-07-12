@@ -16,7 +16,6 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.AllArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
@@ -43,6 +42,7 @@ public class JwtAuthFilter extends OncePerRequestFilter{
                         email, null, authorities
                 );
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+                System.out.println("DEBUG - authorities set: " + authorities);
             }
         }
         filterChain.doFilter(request, response);

@@ -3,26 +3,14 @@ package com.sistemkasir.servicedaftarproduk.controller;
 import java.util.List;
 import java.util.UUID;
 
-import com.sistemkasir.servicedaftarproduk.dto.BatchProdukRequestDTO;
-import com.sistemkasir.servicedaftarproduk.dto.BatchProdukResponseDTO;
+import com.sistemkasir.servicedaftarproduk.dto.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.sistemkasir.servicedaftarproduk.dto.ProdukRequestDTO;
-import com.sistemkasir.servicedaftarproduk.dto.ProdukResponseDTO;
 import com.sistemkasir.servicedaftarproduk.service.ProdukService;
 
 import lombok.AllArgsConstructor;
-
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 
 
 @RestController
@@ -59,5 +47,10 @@ public class ProdukController {
     @PostMapping("/batch")
     public ResponseEntity<BatchProdukResponseDTO> getBatchProduk(@RequestBody BatchProdukRequestDTO batchProdukRequestDTO){
         return ResponseEntity.ok(produkService.batchProduk(batchProdukRequestDTO));
+    }
+
+    @PatchMapping("/reduce-stock")
+    public void reduceStokProduk(@RequestBody RequestPenguranganStokDTO requestPenguranganStokDTO){
+        produkService.reduceStok(requestPenguranganStokDTO);
     }
 }

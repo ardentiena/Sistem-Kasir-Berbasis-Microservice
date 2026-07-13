@@ -41,6 +41,7 @@ public class TransaksiService {
         List<DetailTransaksiResponseDTO> detailTransaksiResponse = getDetailTransaksiResponseDTOs(listDetailTransaksi);
         return new TransaksiResponseDTO(
                 transaksi.getId(),
+                transaksi.getIdPembayaran(),
                 transaksi.getCreatedAt(),
                 transaksi.getKasirEmail(),
                 transaksi.getStatus(),
@@ -82,6 +83,7 @@ public class TransaksiService {
             List<DetailTransaksiResponseDTO> listDetailTransaksiResponse = getDetailTransaksiResponseDTOs(listDetailTransaksi);
             TransaksiResponseDTO transaksiResponseDTO =  new TransaksiResponseDTO(
                     transaksi.getId(),
+                    transaksi.getIdPembayaran(),
                     transaksi.getCreatedAt(),
                     transaksi.getKasirEmail(),
                     transaksi.getStatus(),
@@ -147,6 +149,9 @@ public class TransaksiService {
         ResponseDetailPembayaranDTO responsePembayaran = pembayaranClient.buatPembayaran(requestPembayaran);
         System.out.println("DEBUG - responsePembayaran.getId(): " + responsePembayaran.getIdDetailPembayaran());
 
+        RequestPenguranganStokDTO penguranganStok = new RequestPenguranganStokDTO(transaksiRequestDTO.getProdukList());
+        daftarProdukClient.reduceStok(penguranganStok);
+
         Transaksi transaksi = new Transaksi();
         transaksi.setId(transaksiId);
         transaksi.setKasirEmail(kasirEmail);
@@ -163,6 +168,7 @@ public class TransaksiService {
         List<DetailTransaksiResponseDTO> detailResponse = getDetailTransaksiResponseDTOs(listDetailTransaksi);
         return new TransaksiResponseDTO(
                 transaksi.getId(),
+                transaksi.getIdPembayaran(),
                 transaksi.getCreatedAt(),
                 transaksi.getKasirEmail(),
                 transaksi.getStatus(),

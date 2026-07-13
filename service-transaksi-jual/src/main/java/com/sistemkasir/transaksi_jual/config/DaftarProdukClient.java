@@ -2,6 +2,7 @@ package com.sistemkasir.transaksi_jual.config;
 
 import com.sistemkasir.transaksi_jual.dto.BatchProdukRequestDTO;
 import com.sistemkasir.transaksi_jual.dto.BatchProdukResponseDTO;
+import com.sistemkasir.transaksi_jual.dto.RequestPenguranganStokDTO;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,5 +36,20 @@ public class DaftarProdukClient {
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, e.getMessage());
         }
         return responseDTO;
+    }
+
+    public void reduceStok(RequestPenguranganStokDTO requestPenguranganStokDTO) {
+        try {
+            this.webClient.patch()
+                    .uri("/api/products/reduce-stock")
+                    .accept(MediaType.APPLICATION_JSON)
+                    .bodyValue(requestPenguranganStokDTO)
+                    .retrieve()
+                    .bodyToMono(Void.class)
+                    .block();
+        }catch (Exception e){
+            System.out.println("DEBUG - Error calling service: " + e.getMessage());
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, e.getMessage());
+        }
     }
 }

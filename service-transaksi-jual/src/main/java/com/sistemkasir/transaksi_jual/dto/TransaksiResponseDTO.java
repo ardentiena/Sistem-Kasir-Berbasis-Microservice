@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TransaksiResponseDTO {
     private UUID id;
+    private UUID idDetailPembayaran;
     private Date createdAt;
     private String kasirEmail;
     private Status status;

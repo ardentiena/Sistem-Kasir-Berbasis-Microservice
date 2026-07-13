@@ -6,13 +6,10 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import com.sistemkasir.servicedaftarproduk.dto.BatchProdukRequestDTO;
-import com.sistemkasir.servicedaftarproduk.dto.BatchProdukResponseDTO;
+import com.sistemkasir.servicedaftarproduk.dto.*;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 
-import com.sistemkasir.servicedaftarproduk.dto.ProdukRequestDTO;
-import com.sistemkasir.servicedaftarproduk.dto.ProdukResponseDTO;
 import com.sistemkasir.servicedaftarproduk.model.Produk;
 import com.sistemkasir.servicedaftarproduk.repository.ProdukRepository;
 
@@ -115,5 +112,26 @@ public class ProdukService {
                 produkResponseDTOS,
                 message
         );
+    }
+
+    public void reduceStok(RequestPenguranganStokDTO requestPenguranganStokDTO){
+        List<UUID> listIdProdukPenguranganStok = requestPenguranganStokDTO.getProdukStockReduceRequestDTOS()
+                .stream().map(ProdukPenguranganStokDTO::getIdProduk).toList();
+        List<Produk> produkList = produkRepository.findAllById(listIdProdukPenguranganStok);
+
+        for(ProdukPenguranganStokDTO eachProduk : requestPenguranganStokDTO.getProdukStockReduceRequestDTOS()){
+            Produk produk = produkList.stream()
+                    .filter(p -> p.getId().equals(eachProduk.getIdProduk()))
+                    .findFirst()
+                    .orElse(null);
+            if(produk == null){
+                continue;
+            }else if(produk.getStok() <= eachProduk.getJumlah()){
+                produk.setStok(0);
+            }else{
+                produk.setStok(produk.getStok() - eachProduk.getJumlah());
+            }
+            produkRepository.save(produk);
+        }
     }
 }

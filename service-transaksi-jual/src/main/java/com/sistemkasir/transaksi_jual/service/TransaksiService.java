@@ -149,8 +149,15 @@ public class TransaksiService {
         ResponseDetailPembayaranDTO responsePembayaran = pembayaranClient.buatPembayaran(requestPembayaran);
         System.out.println("DEBUG - responsePembayaran.getId(): " + responsePembayaran.getIdDetailPembayaran());
 
-        RequestPenguranganStokDTO penguranganStok = new RequestPenguranganStokDTO(transaksiRequestDTO.getProdukList());
-        daftarProdukClient.reduceStok(penguranganStok);
+        List<ProdukRequestDTO> itemReduced = transaksiRequestDTO.getProdukList()
+                .stream().map(p -> new ProdukRequestDTO(p.getProdukId(), p.getJumlah())).toList();
+
+        RequestPenguranganStokDTO penguranganStok = new RequestPenguranganStokDTO(itemReduced);
+        try{
+            daftarProdukClient.reduceStok(penguranganStok);
+        }catch(Exception e){
+            System.out.println("DEBUG - Gagal kurangi stok (best effort, transaksi tetap lanjut): " + e.getMessage());
+        }
 
         Transaksi transaksi = new Transaksi();
         transaksi.setId(transaksiId);

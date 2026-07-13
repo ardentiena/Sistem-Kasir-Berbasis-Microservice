@@ -116,20 +116,18 @@ public class ProdukService {
 
     public void reduceStok(RequestPenguranganStokDTO requestPenguranganStokDTO){
         List<UUID> listIdProdukPenguranganStok = requestPenguranganStokDTO.getProdukStockReduceRequestDTOS()
-                .stream().map(ProdukPenguranganStokDTO::getIdProduk).toList();
+                .stream().map(ProdukPenguranganStokDTO::getProdukId).toList();
         List<Produk> produkList = produkRepository.findAllById(listIdProdukPenguranganStok);
 
         for(ProdukPenguranganStokDTO eachProduk : requestPenguranganStokDTO.getProdukStockReduceRequestDTOS()){
             Produk produk = produkList.stream()
-                    .filter(p -> p.getId().equals(eachProduk.getIdProduk()))
+                    .filter(p -> p.getId().equals(eachProduk.getProdukId()))
                     .findFirst()
                     .orElse(null);
             if(produk == null){
                 continue;
-            }else if(produk.getStok() <= eachProduk.getJumlah()){
-                produk.setStok(0);
             }else{
-                produk.setStok(produk.getStok() - eachProduk.getJumlah());
+                produk.setStok(Math.max(0, produk.getStok() - eachProduk.getJumlah()));
             }
             produkRepository.save(produk);
         }

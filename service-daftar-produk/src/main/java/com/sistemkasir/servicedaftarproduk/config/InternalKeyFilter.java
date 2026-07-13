@@ -5,7 +5,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -27,7 +26,9 @@ public class InternalKeyFilter extends OncePerRequestFilter {
         System.out.println("DEBUG - received apiKey: " + apiKey);
         System.out.println("DEBUG - expected apiKey: " + internalApiKey);
         System.out.println("DEBUG - method: " + request.getMethod());
-        if (!internalApiKey.equals(apiKey) && request.getMethod().equalsIgnoreCase("POST")) {
+        if (!internalApiKey.equals(apiKey) &&
+                (request.getMethod().equalsIgnoreCase("POST") ||
+                request.getMethod().equalsIgnoreCase("PATCH"))) {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             response.setContentType("application/json");
             response.getWriter().write("Forbidden: Invalid Internal API Key");

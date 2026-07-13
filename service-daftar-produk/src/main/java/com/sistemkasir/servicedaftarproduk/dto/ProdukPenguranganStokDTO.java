@@ -10,6 +10,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProdukPenguranganStokDTO {
-    private UUID idProduk;
+    private UUID produkId;
     private int jumlah;
 }

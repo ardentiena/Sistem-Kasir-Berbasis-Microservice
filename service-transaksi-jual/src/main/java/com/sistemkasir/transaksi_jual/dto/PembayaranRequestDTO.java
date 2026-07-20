@@ -11,6 +11,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PembayaranRequestDTO {
-    private UUID idTransaksi;
+    private String kodeTransaksi;
     private BigDecimal grandTotal;
 }

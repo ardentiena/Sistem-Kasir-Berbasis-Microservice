@@ -27,25 +27,20 @@ public class PembayaranService {
     private final TransaksiJualClient transaksiJualClient;
 
     public ResponseDetailPembayaranDTO createDetailPembayaran(RequestDetailPembayaranDTO detailPembayaranDTO) {
-        // cek jika response body memiliki isi
-        if (detailPembayaranDTO.getIdTransaksi() == null ||
+        if (detailPembayaranDTO.getKodeTransaksi() == null || detailPembayaranDTO.getKodeTransaksi().isBlank() ||
                 detailPembayaranDTO.getGrandTotal() == null ||
                 detailPembayaranDTO.getGrandTotal().compareTo(BigDecimal.ZERO) <= 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "format request salah!");
         }
-        // buat objek detail pembayaran baru
         DetailPembayaran detailPembayaran = new DetailPembayaran();
-        // insert data ke objek
-        detailPembayaran.setIdTransaksi(detailPembayaranDTO.getIdTransaksi());
+        detailPembayaran.setKodeTransaksi(detailPembayaranDTO.getKodeTransaksi());
         detailPembayaran.setGrandTotal(detailPembayaranDTO.getGrandTotal());
         detailPembayaran.setStatus(Status.PENDING);
-        // simpan ke database
         detailPembayaranRepository.save(detailPembayaran);
 
-        // return response
         return new ResponseDetailPembayaranDTO(
                 detailPembayaran.getId(),
-                detailPembayaran.getIdTransaksi(),
+                detailPembayaran.getKodeTransaksi(),
                 detailPembayaran.getGrandTotal(),
                 detailPembayaran.getStatus(),
                 detailPembayaran.getCreatedAt()
@@ -64,7 +59,7 @@ public class PembayaranService {
             }else{
                 ResponseDetailPembayaranLengkapDTO dto = new ResponseDetailPembayaranLengkapDTO(
                         detailPembayaran.getId(),
-                        detailPembayaran.getIdTransaksi(),
+                        detailPembayaran.getKodeTransaksi(),
                         detailPembayaran.getStatus(),
                         null,
                         detailPembayaran.getGrandTotal(),
@@ -79,14 +74,14 @@ public class PembayaranService {
         return listResponseDetailPembayaranLengkapDTO;
     }
 
-    public ResponseDetailPembayaranLengkapDTO getDetailPembayaranById(UUID id) {
-        DetailPembayaran detailPembayaran = detailPembayaranRepository.findById(id)
+    public ResponseDetailPembayaranLengkapDTO getDetailPembayaranByKode(String kodeTransaksi) {
+        DetailPembayaran detailPembayaran = detailPembayaranRepository.findByKodeTransaksi(kodeTransaksi)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "detail pembayaran tidak ditemukan!"));
-        Optional<Pembayaran> pembayaran = pembayaranRepository.findByDetailPembayaranId(id);
+        Optional<Pembayaran> pembayaran = pembayaranRepository.findByDetailPembayaranId(detailPembayaran.getId());
         if(pembayaran.isEmpty()){
             return new ResponseDetailPembayaranLengkapDTO(
                     detailPembayaran.getId(),
-                    detailPembayaran.getIdTransaksi(),
+                    detailPembayaran.getKodeTransaksi(),
                     detailPembayaran.getStatus(),
                     null,
                     detailPembayaran.getGrandTotal(),
@@ -99,7 +94,7 @@ public class PembayaranService {
         Pembayaran p = pembayaran.get();
         return new ResponseDetailPembayaranLengkapDTO(
                 detailPembayaran.getId(),
-                detailPembayaran.getIdTransaksi(),
+                detailPembayaran.getKodeTransaksi(),
                 detailPembayaran.getStatus(),
                 p.getMetodeBayar(),
                 detailPembayaran.getGrandTotal(),
@@ -110,21 +105,21 @@ public class PembayaranService {
         );
     }
 
-    public ResponsePembayaranDTO transaksiJualPayment(UUID idDetailPembayaran, RequestPembayaranDTO requestPembayaranDTO){
-        if(idDetailPembayaran == null ||
+    public ResponsePembayaranDTO transaksiJualPayment(String kodeTransaksi, RequestPembayaranDTO requestPembayaranDTO){
+        if(kodeTransaksi == null ||
                 requestPembayaranDTO == null ||
                 requestPembayaranDTO.getMetodeBayar() == null ||
                 requestPembayaranDTO.getTotalBayar() == null){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "format request salah!");
         }
-        DetailPembayaran detailPembayaran = detailPembayaranRepository.findById(idDetailPembayaran)
+        DetailPembayaran detailPembayaran = detailPembayaranRepository.findByKodeTransaksi(kodeTransaksi)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "transaksi tidak ditemukan!"));
         Pembayaran pembayaran = getPembayaran(requestPembayaranDTO, detailPembayaran);
         pembayaranRepository.save(pembayaran);
         detailPembayaran.setStatus(Status.PAID);
         detailPembayaranRepository.save(detailPembayaran);
-        // callback goes here
-        boolean callback = transaksiJualClient.transaksiJualCallback(detailPembayaran.getIdTransaksi());
+
+        boolean callback = transaksiJualClient.transaksiJualCallback(detailPembayaran.getKodeTransaksi());
 
         return new ResponsePembayaranDTO(
                 pembayaran.getId(),
@@ -136,13 +131,13 @@ public class PembayaranService {
         );
     }
 
-    public void retryCallback(UUID idDetailPembayaran){
-        DetailPembayaran detailPembayaran = detailPembayaranRepository.findById(idDetailPembayaran)
+    public void retryCallback(String kodeTransaksi){
+        DetailPembayaran detailPembayaran = detailPembayaranRepository.findByKodeTransaksi(kodeTransaksi)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "detail tidak ditemukan!"));
         if(detailPembayaran.getStatus().equals(Status.PENDING)){
             throw new ResponseStatusException(HttpStatus.CONFLICT, "transaksi belum terbayar!");
         }
-        boolean callback = transaksiJualClient.transaksiJualCallback(detailPembayaran.getIdTransaksi());
+        boolean callback = transaksiJualClient.transaksiJualCallback(detailPembayaran.getKodeTransaksi());
         if(!callback){
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "callback gagal. silahkan coba lagi!");
         }
@@ -152,7 +147,7 @@ public class PembayaranService {
         Pembayaran p = pembayaran.get();
         return new ResponseDetailPembayaranLengkapDTO(
                 detailPembayaran.getId(),
-                detailPembayaran.getIdTransaksi(),
+                detailPembayaran.getKodeTransaksi(),
                 detailPembayaran.getStatus(),
                 p.getMetodeBayar(),
                 detailPembayaran.getGrandTotal(),

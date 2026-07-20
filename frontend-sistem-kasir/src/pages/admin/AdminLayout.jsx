@@ -28,6 +28,7 @@ function AdminLayout() {
           <NavLink to="/admin/produk" style={navItemStyle}>Kelola Produk</NavLink>
           <NavLink to="/admin/transaksi" style={navItemStyle}>Transaksi</NavLink>
           <NavLink to="/admin/pembayaran" style={navItemStyle}>Pembayaran</NavLink>
+          <NavLink to="/admin/settings" style={navItemStyle}>Pengaturan</NavLink>
         </nav>
         <button onClick={() => navigate('/')} style={{ marginTop: 24, width: '100%' }}>
           Ke Halaman Kasir

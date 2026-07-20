@@ -13,6 +13,16 @@ public class WebClientConfig {
     private String pembayaranHost;
     @Value("${internal.api.key}")
     private String internalApiKey;
+    @Value("${user-service.host}")
+    private String userServiceHost;
+
+    @Bean(name = "webClientUserService")
+    public WebClient webClientUserService() {
+        return WebClient.builder()
+                .baseUrl(userServiceHost)
+                .defaultHeader("Internal-Api-Key", internalApiKey)
+                .build();
+    }
 
     @Bean(name = "webClientDaftarProduk")
     public WebClient webClientDaftarProduk() {

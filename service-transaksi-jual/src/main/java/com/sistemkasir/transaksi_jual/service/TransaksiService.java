@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
@@ -26,6 +27,7 @@ public class TransaksiService {
     private final DetailTransaksiRepository detailTransaksiRepository;
     private final DaftarProdukClient daftarProdukClient;
     private final PembayaranClient pembayaranClient;
+    private final CabangCacheService cabangCacheService;
 
     public TransaksiResponseDTO findTransaksiById(UUID id){
         String email = Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getName();
@@ -41,6 +43,7 @@ public class TransaksiService {
         List<DetailTransaksiResponseDTO> detailTransaksiResponse = getDetailTransaksiResponseDTOs(listDetailTransaksi);
         return new TransaksiResponseDTO(
                 transaksi.getId(),
+                transaksi.getKodeTransaksi(),
                 transaksi.getIdPembayaran(),
                 transaksi.getCreatedAt(),
                 transaksi.getKasirEmail(),
@@ -83,6 +86,7 @@ public class TransaksiService {
             List<DetailTransaksiResponseDTO> listDetailTransaksiResponse = getDetailTransaksiResponseDTOs(listDetailTransaksi);
             TransaksiResponseDTO transaksiResponseDTO =  new TransaksiResponseDTO(
                     transaksi.getId(),
+                    transaksi.getKodeTransaksi(),
                     transaksi.getIdPembayaran(),
                     transaksi.getCreatedAt(),
                     transaksi.getKasirEmail(),
@@ -109,6 +113,12 @@ public class TransaksiService {
 
     public TransaksiResponseDTO createTransaksi(TransaksiRequestDTO transaksiRequestDTO){
         String kasirEmail = Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getName();
+
+        // Validasi kodeCabang dari cache lokal — fail fast sebelum panggil service lain
+        String kodeCabang = transaksiRequestDTO.getKodeCabang();
+        if (kodeCabang == null || kodeCabang.isBlank() || !cabangCacheService.isKodeCabangValid(kodeCabang)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Kode cabang tidak valid atau tidak ditemukan");
+        }
 
         List<UUID> listRequestIdProduk = transaksiRequestDTO.getProdukList()
                 .stream().map(ProdukRequestDTO::getProdukId).toList();
@@ -147,7 +157,6 @@ public class TransaksiService {
 
         PembayaranRequestDTO requestPembayaran = new PembayaranRequestDTO(transaksiId, grandTotal);
         ResponseDetailPembayaranDTO responsePembayaran = pembayaranClient.buatPembayaran(requestPembayaran);
-        System.out.println("DEBUG - responsePembayaran.getId(): " + responsePembayaran.getIdDetailPembayaran());
 
         List<ProdukRequestDTO> itemReduced = transaksiRequestDTO.getProdukList()
                 .stream().map(p -> new ProdukRequestDTO(p.getProdukId(), p.getJumlah())).toList();
@@ -161,11 +170,17 @@ public class TransaksiService {
 
         Transaksi transaksi = new Transaksi();
         transaksi.setId(transaksiId);
+        transaksi.setKodeCabang(kodeCabang);
         transaksi.setKasirEmail(kasirEmail);
         transaksi.setGrandTotal(grandTotal);
         transaksi.setStatus(Status.PENDING);
         transaksi.setIdPembayaran(responsePembayaran.getIdDetailPembayaran());
-        transaksi = transaksiRepository.save(transaksi);
+        transaksi = transaksiRepository.save(transaksi); // save pertama — untuk dapat nomorUrut dari DB
+
+        String tanggal = new SimpleDateFormat("yyyyMMdd").format(new Date());
+        String kodeTransaksi = String.format("TRX-%s-%s-%04d", kodeCabang, tanggal, transaksi.getNomorUrut());
+        transaksi.setKodeTransaksi(kodeTransaksi);
+        transaksi = transaksiRepository.save(transaksi); // save kedua — isi kodeTransaksi
 
         for (DetailTransaksi detailTransaksi : listDetailTransaksi) {
             detailTransaksi.setTransaksi(transaksi);
@@ -175,6 +190,7 @@ public class TransaksiService {
         List<DetailTransaksiResponseDTO> detailResponse = getDetailTransaksiResponseDTOs(listDetailTransaksi);
         return new TransaksiResponseDTO(
                 transaksi.getId(),
+                transaksi.getKodeTransaksi(),
                 transaksi.getIdPembayaran(),
                 transaksi.getCreatedAt(),
                 transaksi.getKasirEmail(),

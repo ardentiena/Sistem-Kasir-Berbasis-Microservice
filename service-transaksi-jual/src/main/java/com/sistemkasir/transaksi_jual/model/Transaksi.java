@@ -10,7 +10,9 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Generated;
 import org.hibernate.annotations.UuidGenerator;
+import org.hibernate.generator.EventType;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -23,6 +25,17 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 public class Transaksi {
     @Id
     private UUID id;
+
+    @Column(name = "kode_transaksi", unique = true)
+    private String kodeTransaksi;
+
+    @Column(name = "nomor_urut", unique = true, nullable = false, updatable = false,
+            columnDefinition = "BIGINT AUTO_INCREMENT")
+    @Generated(event = EventType.INSERT)
+    private Long nomorUrut;
+
+    @Column(name = "kode_cabang", nullable = false)
+    private String kodeCabang;
 
     @Column(name = "kasir",  nullable = false)
     private String kasirEmail;

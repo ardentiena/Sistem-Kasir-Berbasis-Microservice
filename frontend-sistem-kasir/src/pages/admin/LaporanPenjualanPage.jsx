@@ -1,18 +1,64 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { getAllTransaksi } from '../../api/transaksiJualService';
 
 function formatRupiah(value) {
   return `Rp${Number(value).toLocaleString('id-ID')}`;
 }
 
-function formatTanggalSingkat(dateStr) {
-  return new Date(dateStr).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
+const PERIODE_LABEL = {
+  harian: 'Harian',
+  mingguan: 'Mingguan',
+  bulanan: 'Bulanan',
+  tahunan: 'Tahunan',
+};
+
+// Hitung kunci pengelompokan + label tampilan + nilai urut, tergantung periode yang dipilih.
+function getPeriodeInfo(dateObj, periode) {
+  const year = dateObj.getFullYear();
+  const month = dateObj.getMonth(); // 0-based
+
+  if (periode === 'mingguan') {
+    // Hitung nomor minggu ISO (Senin sebagai awal minggu)
+    const d = new Date(Date.UTC(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate()));
+    const dayNum = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    const weekNo = Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
+    return {
+      key: `${d.getUTCFullYear()}-W${weekNo}`,
+      label: `Mgg ${weekNo}`,
+      sortValue: d.getUTCFullYear() * 100 + weekNo,
+    };
+  }
+
+  if (periode === 'bulanan') {
+    return {
+      key: `${year}-${String(month + 1).padStart(2, '0')}`,
+      label: dateObj.toLocaleDateString('id-ID', { month: 'short', year: '2-digit' }),
+      sortValue: year * 100 + month,
+    };
+  }
+
+  if (periode === 'tahunan') {
+    return { key: `${year}`, label: `${year}`, sortValue: year };
+  }
+
+  // default: harian
+  return {
+    key: dateObj.toISOString().slice(0, 10),
+    label: dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }),
+    sortValue: dateObj.getTime(),
+  };
 }
 
 function LaporanPenjualanPage() {
   const [transaksiList, setTransaksiList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Baca preferensi periode dari Settings; default 'harian' kalau belum pernah diatur
+  const [periode, setPeriode] = useState(localStorage.getItem('laporanPeriode') || 'harian');
 
   useEffect(() => {
     getAllTransaksi()
@@ -21,9 +67,6 @@ function LaporanPenjualanPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Semua agregasi dihitung dari data transaksi yang sudah di-fetch.
-  // Hanya transaksi SELESAI yang dihitung sebagai penjualan aktual
-  // (PENDING belum tentu jadi uang masuk).
   const analytics = useMemo(() => {
     const selesai = transaksiList.filter((t) => t.status === 'SELESAI');
 
@@ -31,13 +74,11 @@ function LaporanPenjualanPage() {
     const totalTransaksiSelesai = selesai.length;
     const rataRataTransaksi = totalTransaksiSelesai > 0 ? totalPendapatan / totalTransaksiSelesai : 0;
 
-    // Jumlah transaksi per status (PENDING, SELESAI, dll)
     const perStatus = {};
     transaksiList.forEach((t) => {
       perStatus[t.status] = (perStatus[t.status] || 0) + 1;
     });
 
-    // Produk terlaris — agregat dari items di semua transaksi SELESAI
     const produkMap = {};
     selesai.forEach((t) => {
       (t.items || []).forEach((item) => {
@@ -53,26 +94,46 @@ function LaporanPenjualanPage() {
       .sort((a, b) => b.jumlah - a.jumlah)
       .slice(0, 10);
 
-    // Pendapatan per hari — untuk grafik batang sederhana
-    const perHariMap = {};
+    // Rekap pendapatan dikelompokkan sesuai periode yang dipilih
+    const rekapMap = {};
     selesai.forEach((t) => {
-      const tanggal = formatTanggalSingkat(t.createdAt);
-      perHariMap[tanggal] = (perHariMap[tanggal] || 0) + Number(t.grandTotal);
+      const info = getPeriodeInfo(new Date(t.createdAt), periode);
+      if (!rekapMap[info.key]) {
+        rekapMap[info.key] = { label: info.label, sortValue: info.sortValue, total: 0 };
+      }
+      rekapMap[info.key].total += Number(t.grandTotal);
     });
-    const pendapatanPerHari = Object.entries(perHariMap).map(([tanggal, total]) => ({ tanggal, total }));
-    const maxPendapatanHarian = Math.max(...pendapatanPerHari.map((d) => d.total), 1);
+    const rekapPeriode = Object.values(rekapMap).sort((a, b) => a.sortValue - b.sortValue);
+    const maxRekap = Math.max(...rekapPeriode.map((d) => d.total), 1);
 
-    return { totalPendapatan, totalTransaksiSelesai, rataRataTransaksi, perStatus, produkTerlaris, pendapatanPerHari, maxPendapatanHarian };
-  }, [transaksiList]);
+    return { totalPendapatan, totalTransaksiSelesai, rataRataTransaksi, perStatus, produkTerlaris, rekapPeriode, maxRekap };
+  }, [transaksiList, periode]);
 
   if (loading) return <p>Memuat laporan...</p>;
   if (error) return <p style={{ color: 'red' }}>Error: {error}</p>;
 
+  // Susun titik-titik grafik garis dalam koordinat SVG
+  const chartWidth = 600;
+  const chartHeight = 160;
+  const padding = 24;
+  const points = analytics.rekapPeriode.map((d, i) => {
+    const x = analytics.rekapPeriode.length > 1
+      ? padding + (i / (analytics.rekapPeriode.length - 1)) * (chartWidth - padding * 2)
+      : chartWidth / 2;
+    const y = chartHeight - padding - (d.total / analytics.maxRekap) * (chartHeight - padding * 2);
+    return { x, y, ...d };
+  });
+  const polylinePoints = points.map((p) => `${p.x},${p.y}`).join(' ');
+
   return (
     <div>
-      <h2>Laporan Penjualan</h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+        <h2>Laporan Penjualan</h2>
+        <span style={{ fontSize: 13, color: '#888' }}>
+          Rekap: {PERIODE_LABEL[periode]} — ubah di <Link to="/admin/settings">Pengaturan</Link>
+        </span>
+      </div>
 
-      {/* Kartu ringkasan */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginTop: 16 }}>
         <div style={{ border: '1px solid #333', borderRadius: 8, padding: 16 }}>
           <p style={{ color: '#888', margin: 0 }}>Total Pendapatan</p>
@@ -94,7 +155,6 @@ function LaporanPenjualanPage() {
         </div>
       </div>
 
-      {/* Breakdown status */}
       <div style={{ marginTop: 24 }}>
         <h4>Transaksi per Status</h4>
         <div style={{ display: 'flex', gap: 12 }}>
@@ -106,31 +166,32 @@ function LaporanPenjualanPage() {
         </div>
       </div>
 
-      {/* Grafik batang pendapatan per hari (CSS murni, tanpa library) */}
       <div style={{ marginTop: 24 }}>
-        <h4>Pendapatan per Hari</h4>
-        {analytics.pendapatanPerHari.length === 0 ? (
+        <h4>Pendapatan — Rekap {PERIODE_LABEL[periode]}</h4>
+        {points.length === 0 ? (
           <p style={{ color: '#888' }}>Belum ada transaksi selesai.</p>
         ) : (
-          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, height: 160, borderBottom: '1px solid #333' }}>
-            {analytics.pendapatanPerHari.map((d) => (
-              <div key={d.tanggal} style={{ textAlign: 'center', flex: 1 }}>
-                <div
-                  title={formatRupiah(d.total)}
-                  style={{
-                    height: `${(d.total / analytics.maxPendapatanHarian) * 140}px`,
-                    background: '#4f8cff',
-                    borderRadius: '4px 4px 0 0',
-                  }}
-                />
-                <p style={{ fontSize: 11, color: '#888', marginTop: 4 }}>{d.tanggal}</p>
-              </div>
+          <svg viewBox={`0 0 ${chartWidth} ${chartHeight + 24}`} style={{ width: '100%', maxWidth: 700 }}>
+            <polyline
+              points={polylinePoints}
+              fill="none"
+              stroke="#4f8cff"
+              strokeWidth="2"
+            />
+            {points.map((p) => (
+              <g key={p.label + p.sortValue}>
+                <circle cx={p.x} cy={p.y} r="3.5" fill="#4f8cff">
+                  <title>{`${p.label}: ${formatRupiah(p.total)}`}</title>
+                </circle>
+                <text x={p.x} y={chartHeight + 16} fontSize="10" fill="#888" textAnchor="middle">
+                  {p.label}
+                </text>
+              </g>
             ))}
-          </div>
+          </svg>
         )}
       </div>
 
-      {/* Produk terlaris */}
       <div style={{ marginTop: 24 }}>
         <h4>Produk Terlaris</h4>
         {analytics.produkTerlaris.length === 0 ? (

@@ -1,10 +1,11 @@
 package com.sistemkasir.servicedaftarproduk.service;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import com.sistemkasir.servicedaftarproduk.dto.*;
 import org.jspecify.annotations.NonNull;
@@ -22,13 +23,11 @@ public class ProdukService {
 
     public List<ProdukResponseDTO> getAllProduk(){
         List<Produk> produkList = produkRepository.findAll();
-
         return getProdukResponseDTOS(produkList);
     }
 
     public List<ProdukResponseDTO> findProdukByName(String namaProduk){
-        List<Produk> produkList = produkRepository.findByNamaProdukContaining(namaProduk);
-
+        List<Produk> produkList = produkRepository.findByNamaProdukContainingIgnoreCase(namaProduk);
         return getProdukResponseDTOS(produkList);
     }
 
@@ -36,55 +35,66 @@ public class ProdukService {
     private List<ProdukResponseDTO> getProdukResponseDTOS(List<Produk> produkList) {
         List<ProdukResponseDTO> produkResponseList = new ArrayList<>();
         for (Produk produk : produkList) {
-            ProdukResponseDTO productResponse = new ProdukResponseDTO(
+            produkResponseList.add(toResponseDTO(produk));
+        }
+        return produkResponseList;
+    }
+
+    private ProdukResponseDTO toResponseDTO(Produk produk) {
+        return new ProdukResponseDTO(
                 produk.getId(),
+                produk.getKodeProduk(),
                 produk.getNamaProduk(),
                 produk.getKategori(),
                 produk.getHarga(),
                 produk.getStok(),
                 produk.getCreatedAt(),
                 produk.getUpdatedAt()
-            );
-            produkResponseList.add(productResponse);
-        }
-        return produkResponseList;
+        );
     }
 
     public ProdukResponseDTO addNewProduk(ProdukRequestDTO produkRequest){
         Produk newProduk = new Produk();
-        return getProdukResponseDTO(produkRequest, newProduk);
-    }
-
-    @NonNull
-    private ProdukResponseDTO getProdukResponseDTO(ProdukRequestDTO produkRequest, Produk newProduk) {
         newProduk.setNamaProduk(produkRequest.getNamaProduk());
         newProduk.setKategori(produkRequest.getKategori());
         newProduk.setHarga(produkRequest.getHarga());
         newProduk.setStok(produkRequest.getStok());
-        produkRepository.save(newProduk);
 
-        return new ProdukResponseDTO(
-            newProduk.getId(),
-            newProduk.getNamaProduk(),
-            newProduk.getKategori(),
-            newProduk.getHarga(),
-            newProduk.getStok(),
-            newProduk.getCreatedAt(),
-            newProduk.getUpdatedAt()
-        );
+        String barcode = produkRequest.getBarcode();
+        if (barcode != null && !barcode.isBlank()) {
+            if (produkRepository.existsByKodeProduk(barcode)) {
+                throw new RuntimeException("Barcode sudah terdaftar untuk produk lain");
+            }
+            newProduk.setKodeProduk(barcode);
+            produkRepository.save(newProduk);
+        } else {
+            produkRepository.save(newProduk); // simpan dulu untuk dapat nomorUrut
+            String tanggal = new SimpleDateFormat("yyyyMMdd").format(new Date());
+            String kodeFallback = String.format("PRD-%s-%04d", tanggal, newProduk.getNomorUrut());
+            newProduk.setKodeProduk(kodeFallback);
+            produkRepository.save(newProduk);
+        }
+
+        return toResponseDTO(newProduk);
     }
 
-    public ProdukResponseDTO updateProduk(UUID id, ProdukRequestDTO updateProdukRequest){
-        Optional<Produk> produk = produkRepository.findById(id);
+    public ProdukResponseDTO updateProduk(String kodeProduk, ProdukRequestDTO updateProdukRequest){
+        Optional<Produk> produk = produkRepository.findByKodeProduk(kodeProduk);
         if(produk.isEmpty()){
             throw new RuntimeException("Produk tidak ditemukan");
         }
         Produk updatedProduk = produk.get();
-        return getProdukResponseDTO(updateProdukRequest, updatedProduk);
+        updatedProduk.setNamaProduk(updateProdukRequest.getNamaProduk());
+        updatedProduk.setKategori(updateProdukRequest.getKategori());
+        updatedProduk.setHarga(updateProdukRequest.getHarga());
+        updatedProduk.setStok(updateProdukRequest.getStok());
+
+        produkRepository.save(updatedProduk);
+        return toResponseDTO(updatedProduk);
     }
 
-    public String deleteProduk(UUID id){
-        Optional<Produk> produk = produkRepository.findById(id);
+    public String deleteProduk(String kodeProduk){
+        Optional<Produk> produk = produkRepository.findByKodeProduk(kodeProduk);
         if(produk.isEmpty()){
             throw new RuntimeException("Produk tidak ditemukan");
         }
@@ -94,24 +104,24 @@ public class ProdukService {
     }
 
     public BatchProdukResponseDTO batchProduk(BatchProdukRequestDTO batchProdukRequestDTO){
-        List<Produk> produkFound = produkRepository.findAllById(batchProdukRequestDTO.getIdProduk());
-        List<UUID> requestIds = batchProdukRequestDTO.getIdProduk();
-        List<UUID> idKetemu = produkFound.stream()
-                .map(Produk::getId)
+        List<String> requestKode = batchProdukRequestDTO.getKodeProduk();
+        List<Produk> produkFound = produkRepository.findAllByKodeProdukIn(requestKode);
+
+        List<String> kodeKetemu = produkFound.stream()
+                .map(Produk::getKodeProduk)
                 .toList();
-        List<UUID> idTidakKetemu = requestIds.stream()
-                .filter(id -> !idKetemu.contains(id))
+        List<String> kodeTidakKetemu = requestKode.stream()
+                .filter(k -> !kodeKetemu.contains(k))
                 .toList();
-        String message = "";
-        if(idTidakKetemu.isEmpty())
-            message = idKetemu.size() + "/" + requestIds.size() + " ditemukan.";
-        else message = idKetemu.size() + "/" + requestIds.size() +
-                    " ditemukan." + idTidakKetemu.size() + " produk tidak ditemukan";
+
+        String message;
+        if(kodeTidakKetemu.isEmpty())
+            message = kodeKetemu.size() + "/" + requestKode.size() + " ditemukan.";
+        else message = kodeKetemu.size() + "/" + requestKode.size() +
+                " ditemukan." + kodeTidakKetemu.size() + " produk tidak ditemukan";
+
         List<ProdukResponseDTO> produkResponseDTOS = getProdukResponseDTOS(produkFound);
-        return new BatchProdukResponseDTO(
-                produkResponseDTOS,
-                message
-        );
+        return new BatchProdukResponseDTO(produkResponseDTOS, message);
     }
 
     public void reduceStok(RequestPenguranganStokDTO requestPenguranganStokDTO){

@@ -3,6 +3,8 @@ package com.sistemkasir.userservice.controller;
 import java.util.List;
 import java.util.UUID;
 
+import com.sistemkasir.userservice.dto.*;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,10 +16,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.sistemkasir.userservice.dto.LoginUserDTO;
-import com.sistemkasir.userservice.dto.RegisterUserDTO;
-import com.sistemkasir.userservice.dto.UserRequestDTO;
-import com.sistemkasir.userservice.dto.UserResponseDTO;
 import com.sistemkasir.userservice.service.UserService;
 
 import lombok.AllArgsConstructor;
@@ -35,6 +33,10 @@ public class UserController {
     @PostMapping("/auth/login")
     public ResponseEntity<String> loginUser(@RequestBody LoginUserDTO loginUser){
         return ResponseEntity.ok(userService.login(loginUser));
+    }
+    @PostMapping("/users/assign")
+    public ResponseEntity<String> assignUserToCabang(@Valid @RequestBody AssignUserToCabangDTO request) {
+        return ResponseEntity.ok(userService.assignUserToCabang(request));
     }
     @GetMapping("/users")
     public ResponseEntity<List<UserResponseDTO>> getAllUser(){

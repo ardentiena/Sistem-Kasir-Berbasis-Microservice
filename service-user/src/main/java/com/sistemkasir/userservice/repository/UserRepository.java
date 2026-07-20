@@ -10,4 +10,5 @@ import com.sistemkasir.userservice.model.User;
     
 public interface UserRepository extends JpaRepository<User, UUID>{
     public Optional<User> findByEmail(String email);
+    Optional<User> findByKodePegawai(String kodePegawai);
 }

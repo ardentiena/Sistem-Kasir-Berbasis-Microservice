@@ -24,7 +24,7 @@ public class DetailTransaksi {
     private Transaksi transaksi;
 
     @Column(name = "id_produk", nullable = false)
-    private UUID produkId;
+    private String kodeProduk;
 
     @Column(name = "nama_produk", nullable = false)
     private String namaProduk;

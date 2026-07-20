@@ -10,5 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TransaksiRequestDTO {
+    private String kodeCabang;
     private List<ProdukRequestDTO> produkList;
 }

@@ -11,6 +11,7 @@ import ProdukAdminPage from './pages/admin/ProdukAdminPage';
 import TransaksiListPage from './pages/admin/TransaksiListPage';
 import PembayaranListPage from './pages/admin/PembayaranListPage';
 import LaporanPenjualanPage from './pages/admin/LaporanPenjualanPage';
+import SettingsPage from './pages/admin/SettingsPage';
 import { logout } from './api/userService';
 
 function KasirLandingPage() {
@@ -67,6 +68,7 @@ function App() {
           <Route path="transaksi" element={<TransaksiListPage />} />
           <Route path="pembayaran" element={<PembayaranListPage />} />
           <Route path="laporan" element={<LaporanPenjualanPage />} />
+          <Route path="settings" element={<SettingsPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

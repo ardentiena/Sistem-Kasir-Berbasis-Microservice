@@ -34,14 +34,14 @@ public class ProdukController {
         return ResponseEntity.status(HttpStatus.CREATED).body(produkService.addNewProduk(produkRequest));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<ProdukResponseDTO> updateProduk(@PathVariable UUID id, @RequestBody ProdukRequestDTO productRequest) {
-        return ResponseEntity.ok(produkService.updateProduk(id, productRequest));
+    @PutMapping("/{kodeProduk}")
+    public ResponseEntity<ProdukResponseDTO> updateProduk(@PathVariable String kodeProduk, @RequestBody ProdukRequestDTO productRequest) {
+        return ResponseEntity.ok(produkService.updateProduk(kodeProduk, productRequest));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteProduk(@PathVariable UUID id){
-        return ResponseEntity.status(HttpStatus.OK).body(produkService.deleteProduk(id));
+    @DeleteMapping("/{kodeProduk}")
+    public ResponseEntity<String> deleteProduk(@PathVariable String kodeProduk){
+        return ResponseEntity.status(HttpStatus.OK).body(produkService.deleteProduk(kodeProduk));
     }
 
     @PostMapping("/batch")

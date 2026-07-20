@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ProdukResponseDTO {
     private UUID id;
+    private String kodeProduk;
     private String namaProduk;
     private String kategori;
     private BigDecimal harga;

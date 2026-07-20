@@ -12,10 +12,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UserResponseDTO {
     private UUID id;
+    private String idPegawai;
     private String role;
     private String namaDepan;
     private String namaBelakang;
     private String email;
+    private String kodeCabang;
     private boolean isActive;
     private Date createdAt;
     private Date updatedAt;

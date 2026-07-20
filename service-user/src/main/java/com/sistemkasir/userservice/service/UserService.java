@@ -1,153 +1,168 @@
 package com.sistemkasir.userservice.service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
-import lombok.AllArgsConstructor;
+import com.sistemkasir.userservice.dto.*;
+import com.sistemkasir.userservice.model.Cabang;
+import com.sistemkasir.userservice.model.User;
+import com.sistemkasir.userservice.repository.CabangRepository;
+import com.sistemkasir.userservice.repository.UserRepository;
+import com.sistemkasir.userservice.config.JwtUtil;
+
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
-
-import com.sistemkasir.userservice.config.JwtUtil;
-import com.sistemkasir.userservice.dto.LoginUserDTO;
-import com.sistemkasir.userservice.dto.RegisterUserDTO;
-import com.sistemkasir.userservice.dto.UserRequestDTO;
-import com.sistemkasir.userservice.dto.UserResponseDTO;
-import com.sistemkasir.userservice.model.User;
-import com.sistemkasir.userservice.repository.UserRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final CabangRepository cabangRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
-    public UserResponseDTO register(RegisterUserDTO userRegister){
-       // cari user berdasarkan email dan simpan ke registerEmail
-       // Optional itu untuk jaga-jaga kalau datanya tidak ada
-        Optional<User> registerEmail = userRepository.findByEmail(userRegister.getEmail());
-        if(registerEmail.isPresent()){
+    @Transactional
+    public UserResponseDTO register(RegisterUserDTO userRegister) {
+        if (userRepository.findByEmail(userRegister.getEmail()).isPresent()) {
             throw new RuntimeException("Email sudah terdaftar");
         }
-        // buat objek user baru
+
+        Cabang cabang = null;
+        if (userRegister.getKodeCabang() != null && !userRegister.getKodeCabang().isBlank()) {
+            cabang = cabangRepository.findByKodeCabang(userRegister.getKodeCabang())
+                    .orElseThrow(() -> new RuntimeException("Cabang tidak terdaftar"));
+        }
+
         User newUser = new User();
-        // isi data dari parameter ke objek baru ini
         newUser.setNamaDepan(userRegister.getNamaDepan());
         newUser.setNamaBelakang(userRegister.getNamaBelakang());
         newUser.setEmail(userRegister.getEmail());
         newUser.setPassword(passwordEncoder.encode(userRegister.getPassword()));
         newUser.setRole(userRegister.getRole());
+        newUser.setCabang(cabang);
         newUser.setIsActive(true);
-        // simpan ke database
+
+        newUser = userRepository.saveAndFlush(newUser);
+
+        String tanggal = new SimpleDateFormat("yyyyMMdd").format(new Date());
+        String idPegawai;
+
+        if ("ADMIN".equalsIgnoreCase(userRegister.getRole())) {
+            idPegawai = String.format("ADM%s%04d", tanggal, newUser.getNomorUrut());
+        } else {
+            String kodeCabang = (cabang != null) ? cabang.getKodeCabang() : "";
+            idPegawai = String.format("KSR%s%s%04d", kodeCabang, tanggal, newUser.getNomorUrut());
+        }
+
+        newUser.setKodePegawai(idPegawai);
         userRepository.save(newUser);
 
-        return new UserResponseDTO(
-            newUser.getUserId(),
-            newUser.getRole(), 
-            newUser.getNamaDepan(), 
-            newUser.getNamaBelakang(), 
-            newUser.getEmail(),
-            newUser.getIsActive(),
-            newUser.getCreatedAt(),
-            newUser.getUpdatedAt()
-        );
+        return mapToResponseDTO(newUser);
     }
 
-    public String login(LoginUserDTO userLogin){
+    public String login(LoginUserDTO userLogin) {
         User user = findUserByEmail(userLogin.getEmail());
-        // cek jika password sama dengan di database
-        if(!passwordEncoder.matches(userLogin.getPassword(), user.getPassword())){
+        if (!passwordEncoder.matches(userLogin.getPassword(), user.getPassword())) {
             throw new RuntimeException("Password salah");
         }
-        // return jwt key yang digenerate
         return jwtUtil.generateToken(user);
     }
 
-    public List<UserResponseDTO> getAllUser(){
-        // ambil semua data user dan masukkan ke List<User>
-        List<User> userList = userRepository.findAll();
-        // siapkan array untuk list response
-        List<UserResponseDTO> userResponseList = new ArrayList<>();
-        // loop semua User di userList
-        for(User user : userList){
-            // buat response setiap user
-            UserResponseDTO userResponse = new UserResponseDTO(
-                user.getUserId(),
-                user.getRole(),
-                user.getNamaDepan(),
-                user.getNamaBelakang(),
-                user.getEmail(),
-                user.getIsActive(),
-                user.getCreatedAt(),
-                user.getUpdatedAt()
-            );
-            // masukkan response ke response list
-            userResponseList.add(userResponse);
+    @Transactional
+    public String assignUserToCabang(AssignUserToCabangDTO assignUserToCabangDTO) {
+        User user = userRepository.findByKodePegawai(assignUserToCabangDTO.getKodePegawai())
+                .orElseThrow(() -> new RuntimeException("Id Pegawai tidak ditemukan"));
+
+        String kodeCabangLama = getKodeCabangSafe(user);
+        if (Objects.equals(kodeCabangLama, assignUserToCabangDTO.getKodeCabang())) {
+            throw new RuntimeException("Masukkan cabang yang berbeda");
         }
-        return userResponseList;
+
+        Cabang cabangBaru = cabangRepository.findByKodeCabang(assignUserToCabangDTO.getKodeCabang())
+                .orElseThrow(() -> new RuntimeException("Cabang baru tidak ditemukan"));
+
+        user.setCabang(cabangBaru);
+
+        String tanggal = new SimpleDateFormat("yyyyMMdd").format(user.getCreatedAt() != null ? user.getCreatedAt() : new Date());
+
+        // Update Kode Pegawai sesuai cabang baru
+        if ("ADMIN".equalsIgnoreCase(user.getRole())) {
+            user.setKodePegawai(String.format("ADM%s%04d", tanggal, user.getNomorUrut()));
+        } else {
+            user.setKodePegawai(String.format("KSR%s%s%04d", cabangBaru.getKodeCabang(), tanggal, user.getNomorUrut()));
+        }
+
+        userRepository.save(user);
+        return String.format("Pegawai %s ditugaskan di cabang %s", user.getKodePegawai(), cabangBaru.getNamaCabang());
     }
 
-    public UserResponseDTO getUserById(UUID id){
+    public List<UserResponseDTO> getAllUser() {
+        return userRepository.findAll().stream()
+                .map(this::mapToResponseDTO)
+                .toList();
+    }
+
+    public UserResponseDTO getUserById(UUID id) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        
-        // cari user berdasarkan id dan simpan ke userId
+
         User userId = findUserById(id);
-        User userEmail = findUserByEmail(email);    
-        if(!userEmail.getUserId().equals(userId.getUserId()) && !userEmail.getRole().equals("ADMIN")){
+        User userEmail = findUserByEmail(email);
+
+        if (!userEmail.getUserId().equals(userId.getUserId()) && !"ADMIN".equalsIgnoreCase(userEmail.getRole())) {
             throw new AccessDeniedException("You have no permission!");
         }
 
-        return new UserResponseDTO(
-            userId.getUserId(),
-            userId.getRole(), 
-            userId.getNamaDepan(), 
-            userId.getNamaBelakang(), 
-            userId.getEmail(),
-            userId.getIsActive(),
-            userId.getCreatedAt(),
-            userId.getUpdatedAt()
-        );
+        return mapToResponseDTO(userId);
     }
 
-    public UserResponseDTO updateUser(UUID id, UserRequestDTO updateUserRequest){
-        // simpan data user ke userId
+    @Transactional
+    public UserResponseDTO updateUser(UUID id, UserRequestDTO updateUserRequest) {
         User user = findUserById(id);
         user.setRole(updateUserRequest.getRole());
         user.setNamaDepan(updateUserRequest.getNamaDepan());
         user.setNamaBelakang(updateUserRequest.getNamaBelakang());
         user.setEmail(updateUserRequest.getEmail());
-        // save ke database
+
         userRepository.save(user);
-        // return data yang baru
-        return new UserResponseDTO(
-            user.getUserId(),
-            user.getRole(), 
-            user.getNamaDepan(), 
-            user.getNamaBelakang(), 
-            user.getEmail(),
-            user.getIsActive(),
-            user.getCreatedAt(),
-            user.getUpdatedAt()
-        );
+        return mapToResponseDTO(user);
     }
 
-    public String deleteUser(UUID id){
+    public String deleteUser(UUID id) {
         User user = findUserById(id);
         userRepository.delete(user);
         return "User berhasil dihapus";
     }
 
-    private User findUserById(UUID id){
-        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
-        return user;
+    private UserResponseDTO mapToResponseDTO(User user) {
+        return new UserResponseDTO(
+                user.getUserId(),
+                user.getKodePegawai(),
+                user.getRole(),
+                user.getNamaDepan(),
+                user.getNamaBelakang(),
+                user.getEmail(),
+                getKodeCabangSafe(user), // Mencegah NullPointerException
+                user.getIsActive(),
+                user.getCreatedAt(),
+                user.getUpdatedAt()
+        );
     }
 
-    private User findUserByEmail(String email){
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Email tidak ditemukan"));
-        return user;
+    private String getKodeCabangSafe(User user) {
+        return (user.getCabang() != null) ? user.getCabang().getKodeCabang() : null;
+    }
+
+    private User findUserById(UUID id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
+    }
+
+    private User findUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Email tidak ditemukan"));
     }
 }

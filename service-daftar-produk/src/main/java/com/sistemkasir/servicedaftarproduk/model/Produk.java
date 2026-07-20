@@ -4,16 +4,14 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.UUID;
 
+import jakarta.persistence.*;
+import org.hibernate.annotations.Generated;
 import org.hibernate.annotations.UuidGenerator;
+import org.hibernate.generator.EventType;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -40,6 +38,13 @@ public class Produk {
 
     @Column(name = "stok", nullable = false)
     private int stok;
+
+    @Column(name = "kode_produk", unique = true)
+    private String kodeProduk;
+
+    @Column(name = "nomor_urut", unique = true, nullable = false, updatable = false, columnDefinition = "BIGINT AUTO_INCREMENT")
+    @Generated(event = EventType.INSERT)
+    private Long nomorUrut;
 
     @Column(name = "created_at", nullable = false)
     @CreatedDate

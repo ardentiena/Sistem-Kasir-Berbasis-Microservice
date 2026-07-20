@@ -14,4 +14,5 @@ public class ProdukRequestDTO {
     private String kategori;
     private BigDecimal harga;
     private int stok;
+    private String barcode;
 }

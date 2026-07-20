@@ -28,14 +28,14 @@ public class TransaksiController {
         return ResponseEntity.ok(transaksiService.getAllTransaksi());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<TransaksiResponseDTO> getTransaksi(@PathVariable UUID id) {
-        return ResponseEntity.ok(transaksiService.findTransaksiById(id));
+    @GetMapping("/{kodeTransaksi}")
+    public ResponseEntity<TransaksiResponseDTO> getTransaksi(@PathVariable String kodeTransaksi) {
+        return ResponseEntity.ok(transaksiService.findTransaksiByKodeTransaksi(kodeTransaksi));
     }
 
-    @PatchMapping("/{id}")
-    public ResponseEntity<String> updateTransaksi(@PathVariable UUID id, @RequestBody TransaksiStatusUpdateDTO transaksiStatusUpdateDTO) {
-        transaksiService.updateStatusTransaksi(id, transaksiStatusUpdateDTO);
+    @PatchMapping("/{kodeTransaksi}")
+    public ResponseEntity<String> updateTransaksi(@PathVariable String kodeTransaksi, @RequestBody TransaksiStatusUpdateDTO dto) {
+        transaksiService.updateStatusTransaksi(kodeTransaksi, dto);
         return ResponseEntity.ok("Status updated");
     }
 }

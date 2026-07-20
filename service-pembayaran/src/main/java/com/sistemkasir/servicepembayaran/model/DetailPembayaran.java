@@ -22,13 +22,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DetailPembayaran {
-    @Column
     @Id
     @UuidGenerator
     private UUID id;
 
-    @Column(name = "id_transaksi", nullable = false)
-    private UUID idTransaksi;
+    @Column(name = "kode_transaksi", nullable = false, unique = true)
+    private String kodeTransaksi;
 
     @Column(name = "grand_total", nullable = false)
     private BigDecimal grandTotal;

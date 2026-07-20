@@ -15,7 +15,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class ResponseDetailPembayaranLengkapDTO {
     private UUID idDetailPembayaran;
-    private UUID idTransaksi;
+    private String kodeTransaksi;
     private Status status;
     private MetodeBayar metodeBayar;
     private BigDecimal grandTotal;

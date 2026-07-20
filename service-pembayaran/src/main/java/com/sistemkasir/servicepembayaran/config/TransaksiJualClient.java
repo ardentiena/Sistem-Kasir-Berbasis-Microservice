@@ -19,13 +19,13 @@ import lombok.extern.slf4j.Slf4j;
 public class TransaksiJualClient {
     private final WebClient webClient;
 
-    public boolean transaksiJualCallback(UUID transaksiId) {
+    public boolean transaksiJualCallback(String kodeTransaksi) {
         // 1. build DTO dengan status "SELESAI"
         TransaksiStatusUpdateDTO dto = new TransaksiStatusUpdateDTO(StatusUpdate.SELESAI);
         // 2. build request PATCH ke transaksiJualHost + "/api/transactions/" + idTransaksi
         try{
             this.webClient.patch()
-                    .uri("/api/transactions/{id}", transaksiId)
+                    .uri("/api/transactions/{kodeTransaksi}", kodeTransaksi)
                     .bodyValue(dto)
                     .retrieve()
                     .bodyToMono(Void.class)

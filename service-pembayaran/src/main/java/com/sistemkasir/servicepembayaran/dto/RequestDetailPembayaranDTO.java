@@ -13,6 +13,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RequestDetailPembayaranDTO {
-    private UUID idTransaksi;
+    private String kodeTransaksi;
     private BigDecimal grandTotal;
 }

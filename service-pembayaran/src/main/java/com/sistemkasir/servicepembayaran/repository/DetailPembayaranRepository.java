@@ -11,4 +11,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface DetailPembayaranRepository extends JpaRepository<DetailPembayaran, UUID>, JpaSpecificationExecutor<DetailPembayaran> {
+    Optional<DetailPembayaran> findByKodeTransaksi(String kodeTransaksi);
 }

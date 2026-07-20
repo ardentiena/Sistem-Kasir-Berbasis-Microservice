@@ -50,7 +50,7 @@ public class Transaksi {
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    @Column(name = "id_pembayaran", nullable = false)
+    @Column(name = "id_pembayaran", nullable = true)
     private UUID idPembayaran;
 
     @Column(name = "created_at",  nullable = false)

@@ -28,7 +28,8 @@ public class InternalKeyFilter extends OncePerRequestFilter {
         System.out.println("DEBUG - method: " + request.getMethod());
         if (!internalApiKey.equals(apiKey) &&
                 (request.getMethod().equalsIgnoreCase("POST") ||
-                request.getMethod().equalsIgnoreCase("PATCH"))) {
+                request.getMethod().equalsIgnoreCase("PATCH") ||
+                request.getMethod().equalsIgnoreCase("GET"))) {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             response.setContentType("application/json");
             response.getWriter().write("Forbidden: Invalid Internal API Key");

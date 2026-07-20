@@ -29,11 +29,11 @@ public class TransaksiService {
     private final PembayaranClient pembayaranClient;
     private final CabangCacheService cabangCacheService;
 
-    public TransaksiResponseDTO findTransaksiById(UUID id){
+    public TransaksiResponseDTO findTransaksiByKodeTransaksi(String kodeTransaksi) {
         String email = Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getName();
         String role = SecurityContextHolder.getContext().getAuthentication().getAuthorities().iterator().next().getAuthority();
 
-        Transaksi transaksi = transaksiRepository.findById(id).orElseThrow(
+        Transaksi transaksi = transaksiRepository.findByKodeTransaksi(kodeTransaksi).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Transaksi tidak ditemukan")
         );
         if(!email.equals(transaksi.getKasirEmail()) && !Objects.equals(role, "ROLE_ADMIN")){
@@ -100,8 +100,8 @@ public class TransaksiService {
         return listTransaksiResponseDTO;
     }
 
-    public void updateStatusTransaksi(UUID id, TransaksiStatusUpdateDTO updateStatusDTO){
-        Transaksi transaksi = transaksiRepository.findById(id).orElseThrow(
+    public void updateStatusTransaksi(String kodeTransaksi, TransaksiStatusUpdateDTO updateStatusDTO){
+        Transaksi transaksi = transaksiRepository.findByKodeTransaksi(kodeTransaksi).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Transaksi tidak ditemukan")
         );
         if(!updateStatusDTO.getStatus().equals(Status.SELESAI)){
@@ -138,7 +138,7 @@ public class TransaksiService {
 
         for (ProdukRequestDTO eachProduk : transaksiRequestDTO.getProdukList()) {
             ProdukResponseDTO produk = daftarProduk.getProduk().stream()
-                    .filter(p -> p.getId().equals(eachProduk.getKodeProduk()))
+                    .filter(p -> p.getKodeProduk().equals(eachProduk.getKodeProduk()))
                     .findFirst()
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produk tidak ditemukan"));
 
@@ -156,12 +156,25 @@ public class TransaksiService {
 
         UUID transaksiId = UUID.randomUUID();
 
-        PembayaranRequestDTO requestPembayaran = new PembayaranRequestDTO(transaksiId, grandTotal);
+        Transaksi transaksi = new Transaksi();
+        transaksi.setId(transaksiId);
+        transaksi.setKodeCabang(kodeCabang);
+        transaksi.setKasirEmail(kasirEmail);
+        transaksi.setGrandTotal(grandTotal);
+        transaksi.setStatus(Status.PENDING);
+        transaksi = transaksiRepository.save(transaksi); // save #1 -> dapat nomorUrut
+
+        String tanggal = new SimpleDateFormat("yyyyMMdd").format(new Date());
+        String kodeTransaksi = String.format("TRX-%s-%s-%04d", kodeCabang, tanggal, transaksi.getNomorUrut());
+        transaksi.setKodeTransaksi(kodeTransaksi);
+        transaksi = transaksiRepository.save(transaksi); // save #2 -> kodeTransaksi terisi
+
+        PembayaranRequestDTO requestPembayaran = new PembayaranRequestDTO(kodeTransaksi, grandTotal);
         ResponseDetailPembayaranDTO responsePembayaran = pembayaranClient.buatPembayaran(requestPembayaran);
 
-        List<ProdukRequestDTO> itemReduced = transaksiRequestDTO.getProdukList()
-                .stream().map(p -> new ProdukRequestDTO(p.getKodeProduk(), p.getJumlah())).toList();
-
+        List<ProdukRequestDTO> itemReduced = listDetailTransaksi.stream()
+                .map(d -> new ProdukRequestDTO(d.getKodeProduk(), d.getJumlah()))
+                .toList();
         RequestPenguranganStokDTO penguranganStok = new RequestPenguranganStokDTO(itemReduced);
         try{
             daftarProdukClient.reduceStok(penguranganStok);
@@ -169,19 +182,8 @@ public class TransaksiService {
             System.out.println("DEBUG - Gagal kurangi stok (best effort, transaksi tetap lanjut): " + e.getMessage());
         }
 
-        Transaksi transaksi = new Transaksi();
-        transaksi.setId(transaksiId);
-        transaksi.setKodeCabang(kodeCabang);
-        transaksi.setKasirEmail(kasirEmail);
-        transaksi.setGrandTotal(grandTotal);
-        transaksi.setStatus(Status.PENDING);
         transaksi.setIdPembayaran(responsePembayaran.getIdDetailPembayaran());
-        transaksi = transaksiRepository.save(transaksi); // save pertama — untuk dapat nomorUrut dari DB
-
-        String tanggal = new SimpleDateFormat("yyyyMMdd").format(new Date());
-        String kodeTransaksi = String.format("TRX-%s-%s-%04d", kodeCabang, tanggal, transaksi.getNomorUrut());
-        transaksi.setKodeTransaksi(kodeTransaksi);
-        transaksi = transaksiRepository.save(transaksi); // save kedua — isi kodeTransaksi
+        transaksi = transaksiRepository.save(transaksi); // save #3 -> idPembayaran terisi
 
         for (DetailTransaksi detailTransaksi : listDetailTransaksi) {
             detailTransaksi.setTransaksi(transaksi);
@@ -190,14 +192,9 @@ public class TransaksiService {
 
         List<DetailTransaksiResponseDTO> detailResponse = getDetailTransaksiResponseDTOs(listDetailTransaksi);
         return new TransaksiResponseDTO(
-                transaksi.getId(),
-                transaksi.getKodeTransaksi(),
-                transaksi.getIdPembayaran(),
-                transaksi.getCreatedAt(),
-                transaksi.getKasirEmail(),
-                transaksi.getStatus(),
-                detailResponse,
-                transaksi.getGrandTotal()
+                transaksi.getId(), transaksi.getKodeTransaksi(), transaksi.getIdPembayaran(),
+                transaksi.getCreatedAt(), transaksi.getKasirEmail(), transaksi.getStatus(),
+                detailResponse, transaksi.getGrandTotal()
         );
     }
 }

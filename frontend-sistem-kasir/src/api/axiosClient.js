@@ -6,14 +6,12 @@ const createClient = (baseURL) => {
     headers: { 'Content-Type': 'application/json' },
   });
 
-  // Attach JWT ke semua request
   client.interceptors.request.use((config) => {
     const token = localStorage.getItem('token');
     if (token) config.headers.Authorization = `Bearer ${token}`;
     return config;
   });
 
-  // Handle token expired secara global
   client.interceptors.response.use(
     (res) => res,
     (err) => {
@@ -28,7 +26,7 @@ const createClient = (baseURL) => {
   return client;
 };
 
-export const userClient = createClient(import.meta.env.USER_SERVICE_URL);
-export const barangClient = createClient(import.meta.env.BARANG_SERVICE_URL);
-export const transaksiClient = createClient(import.meta.env.TRANSAKSI_SERVICE_URL);
-export const pembayaranClient = createClient(import.meta.env.PEMBAYARAN_SERVICE_URL);
+export const userClient = createClient(import.meta.env.VITE_USER_SERVICE_URL);
+export const produkClient = createClient(import.meta.env.VITE_BARANG_SERVICE_URL);
+export const transaksiClient = createClient(import.meta.env.VITE_TRANSAKSI_SERVICE_URL);
+export const pembayaranClient = createClient(import.meta.env.VITE_PEMBAYARAN_SERVICE_URL);

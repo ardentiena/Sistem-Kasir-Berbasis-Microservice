@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProdukRequestDTO {
-    private UUID produkId;
+    private String kodeProduk;
     private int jumlah;
 }

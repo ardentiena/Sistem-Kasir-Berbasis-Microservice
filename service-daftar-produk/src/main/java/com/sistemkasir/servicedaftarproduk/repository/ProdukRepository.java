@@ -12,4 +12,5 @@ public interface ProdukRepository extends JpaRepository<Produk, UUID>{
     public List<Produk> findByNamaProdukContainingIgnoreCase(String namaProduk);
     boolean existsByKodeProduk(String kodeProduk);
     Optional<Produk> findByKodeProduk(String kodeProduk);
+    List<Produk> findAllByKodeProdukIn(List<String> kodeProdukList);
 }

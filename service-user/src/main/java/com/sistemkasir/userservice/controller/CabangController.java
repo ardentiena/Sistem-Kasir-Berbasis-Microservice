@@ -1,5 +1,6 @@
 package com.sistemkasir.userservice.controller;
 
+import com.sistemkasir.userservice.dto.AssignUserToCabangDTO;
 import com.sistemkasir.userservice.dto.CabangRequestDTO;
 import com.sistemkasir.userservice.dto.CabangResponseDTO;
 import com.sistemkasir.userservice.service.CabangService;

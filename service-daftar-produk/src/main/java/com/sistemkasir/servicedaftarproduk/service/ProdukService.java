@@ -104,24 +104,24 @@ public class ProdukService {
     }
 
     public BatchProdukResponseDTO batchProduk(BatchProdukRequestDTO batchProdukRequestDTO){
-        List<Produk> produkFound = produkRepository.findAllById(batchProdukRequestDTO.getIdProduk());
-        List<UUID> requestIds = batchProdukRequestDTO.getIdProduk();
-        List<UUID> idKetemu = produkFound.stream()
-                .map(Produk::getId)
+        List<String> requestKode = batchProdukRequestDTO.getKodeProduk();
+        List<Produk> produkFound = produkRepository.findAllByKodeProdukIn(requestKode);
+
+        List<String> kodeKetemu = produkFound.stream()
+                .map(Produk::getKodeProduk)
                 .toList();
-        List<UUID> idTidakKetemu = requestIds.stream()
-                .filter(id -> !idKetemu.contains(id))
+        List<String> kodeTidakKetemu = requestKode.stream()
+                .filter(k -> !kodeKetemu.contains(k))
                 .toList();
-        String message = "";
-        if(idTidakKetemu.isEmpty())
-            message = idKetemu.size() + "/" + requestIds.size() + " ditemukan.";
-        else message = idKetemu.size() + "/" + requestIds.size() +
-                " ditemukan." + idTidakKetemu.size() + " produk tidak ditemukan";
+
+        String message;
+        if(kodeTidakKetemu.isEmpty())
+            message = kodeKetemu.size() + "/" + requestKode.size() + " ditemukan.";
+        else message = kodeKetemu.size() + "/" + requestKode.size() +
+                " ditemukan." + kodeTidakKetemu.size() + " produk tidak ditemukan";
+
         List<ProdukResponseDTO> produkResponseDTOS = getProdukResponseDTOS(produkFound);
-        return new BatchProdukResponseDTO(
-                produkResponseDTOS,
-                message
-        );
+        return new BatchProdukResponseDTO(produkResponseDTOS, message);
     }
 
     public void reduceStok(RequestPenguranganStokDTO requestPenguranganStokDTO){

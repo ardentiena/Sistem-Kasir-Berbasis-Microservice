@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class DetailTransaksiResponseDTO {
     private UUID id;
+    private String kodeProduk;
     private String namaProduk;
     private BigDecimal harga;
     private int jumlah;

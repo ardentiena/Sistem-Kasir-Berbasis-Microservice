@@ -57,7 +57,8 @@ public class TransaksiService {
         List<DetailTransaksiResponseDTO> detailTransaksiResponse = new ArrayList<>();
         for(DetailTransaksi detailTransaksi : listDetailTransaksi){
             DetailTransaksiResponseDTO transaksiResponseDTO = new DetailTransaksiResponseDTO(
-                    detailTransaksi.getProdukId(),
+                    detailTransaksi.getId(),
+                    detailTransaksi.getKodeProduk(),
                     detailTransaksi.getNamaProduk(),
                     detailTransaksi.getHarga(),
                     detailTransaksi.getJumlah(),
@@ -120,15 +121,15 @@ public class TransaksiService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Kode cabang tidak valid atau tidak ditemukan");
         }
 
-        List<UUID> listRequestIdProduk = transaksiRequestDTO.getProdukList()
-                .stream().map(ProdukRequestDTO::getProdukId).toList();
+        List<String> listRequestKodeProduk = transaksiRequestDTO.getProdukList()
+                .stream().map(ProdukRequestDTO::getKodeProduk).toList();
 
         BatchProdukRequestDTO batchProdukRequestDTO = new BatchProdukRequestDTO();
-        batchProdukRequestDTO.setIdProduk(listRequestIdProduk);
+        batchProdukRequestDTO.setKodeProduk(listRequestKodeProduk);
 
         BatchProdukResponseDTO daftarProduk = daftarProdukClient.getBatchDaftarProduk(batchProdukRequestDTO);
 
-        if (daftarProduk.getProduk().size() != listRequestIdProduk.size()) {
+        if (daftarProduk.getProduk().size() != listRequestKodeProduk.size()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, daftarProduk.getMessage());
         }
 
@@ -137,7 +138,7 @@ public class TransaksiService {
 
         for (ProdukRequestDTO eachProduk : transaksiRequestDTO.getProdukList()) {
             ProdukResponseDTO produk = daftarProduk.getProduk().stream()
-                    .filter(p -> p.getId().equals(eachProduk.getProdukId()))
+                    .filter(p -> p.getId().equals(eachProduk.getKodeProduk()))
                     .findFirst()
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produk tidak ditemukan"));
 
@@ -145,7 +146,7 @@ public class TransaksiService {
             grandTotal = grandTotal.add(subtotalItem);
 
             DetailTransaksi detailTransaksi = new DetailTransaksi();
-            detailTransaksi.setProdukId(eachProduk.getProdukId());
+            detailTransaksi.setKodeProduk(eachProduk.getKodeProduk());
             detailTransaksi.setNamaProduk(produk.getNamaProduk());
             detailTransaksi.setHarga(produk.getHarga());
             detailTransaksi.setJumlah(eachProduk.getJumlah());
@@ -159,7 +160,7 @@ public class TransaksiService {
         ResponseDetailPembayaranDTO responsePembayaran = pembayaranClient.buatPembayaran(requestPembayaran);
 
         List<ProdukRequestDTO> itemReduced = transaksiRequestDTO.getProdukList()
-                .stream().map(p -> new ProdukRequestDTO(p.getProdukId(), p.getJumlah())).toList();
+                .stream().map(p -> new ProdukRequestDTO(p.getKodeProduk(), p.getJumlah())).toList();
 
         RequestPenguranganStokDTO penguranganStok = new RequestPenguranganStokDTO(itemReduced);
         try{

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../api/userService';
+import '../styles/kasir.css';
 
 function LoginPage() {
   const [email, setEmail] = useState('');
@@ -24,31 +25,19 @@ function LoginPage() {
   };
 
   return (
-    <div style={{ maxWidth: 360, margin: '80px auto', padding: 24, border: '1px solid #ddd', borderRadius: 8 }}>
+    <div className="login-wrapper">
       <h2>Login Kasir</h2>
       <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: 12 }}>
+        <div className="login-field">
           <label>Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            style={{ width: '100%', padding: 8 }}
-          />
+          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
         </div>
-        <div style={{ marginBottom: 12 }}>
+        <div className="login-field">
           <label>Password</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            style={{ width: '100%', padding: 8 }}
-          />
+          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
         </div>
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-        <button type="submit" disabled={loading} style={{ width: '100%', padding: 10 }}>
+        {error && <p className="error-message">{error}</p>}
+        <button type="submit" className="btn btn-primary" disabled={loading}>
           {loading ? 'Memproses...' : 'Login'}
         </button>
       </form>

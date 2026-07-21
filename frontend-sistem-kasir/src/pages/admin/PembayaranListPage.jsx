@@ -1,25 +1,41 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { getAllPembayaran } from '../../api/pembayaranService';
+import { getAllTransaksi } from '../../api/transaksiJualService';
+import { useAdminCabang } from '../../context/AdminCabangContext';
 
 function formatRupiah(value) {
   return `Rp${Number(value).toLocaleString('id-ID')}`;
 }
-
 function formatTanggal(value) {
   return value ? new Date(value).toLocaleString('id-ID') : '-';
 }
 
 function PembayaranListPage() {
+  const { adminKodeCabang } = useAdminCabang();
   const [pembayaranList, setPembayaranList] = useState([]);
+  const [transaksiList, setTransaksiList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    getAllPembayaran()
-      .then((res) => setPembayaranList(res.data))
+    Promise.all([getAllPembayaran(), getAllTransaksi()])
+      .then(([resPembayaran, resTransaksi]) => {
+        setPembayaranList(resPembayaran.data);
+        setTransaksiList(resTransaksi.data);
+      })
       .catch((err) => setError(err.response?.data?.message || err.message))
       .finally(() => setLoading(false));
   }, []);
+
+  const cabangByKodeTransaksi = useMemo(() => {
+    const map = {};
+    transaksiList.forEach((t) => { map[t.kodeTransaksi] = t.kodeCabang; });
+    return map;
+  }, [transaksiList]);
+
+  const filteredPembayaran = adminKodeCabang
+    ? pembayaranList.filter((p) => cabangByKodeTransaksi[p.kodeTransaksi] === adminKodeCabang)
+    : pembayaranList;
 
   if (loading) return <p>Memuat pembayaran...</p>;
   if (error) return <p style={{ color: 'red' }}>Error: {error}</p>;
@@ -39,7 +55,7 @@ function PembayaranListPage() {
           </tr>
         </thead>
         <tbody>
-          {pembayaranList.map((p) => (
+          {filteredPembayaran.map((p) => (
             <tr key={p.idDetailPembayaran} style={{ borderBottom: '1px solid #222' }}>
               <td>{formatTanggal(p.tanggalPembayaran)}</td>
               <td>{p.status}</td>

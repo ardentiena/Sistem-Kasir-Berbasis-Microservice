@@ -1,7 +1,9 @@
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import { CartProvider } from './context/CartContext';
+import { AdminCabangProvider } from './context/AdminCabangContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
+import CabangSelector from './components/CabangSelector';
 import LoginPage from './pages/LoginPage';
 import ProdukPage from './pages/ProdukPage';
 import CheckoutPage from './pages/CheckoutPage';
@@ -26,14 +28,21 @@ function KasirLandingPage() {
 
   return (
     <CartProvider>
-      <div style={{ maxWidth: 900, margin: '0 auto', padding: 16 }}>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginBottom: 12 }}>
+      <div className="kasir-wrapper">
+        <div className="kasir-topbar">
           {role === 'ADMIN' && (
-            <button onClick={() => navigate('/admin/laporan')}>Admin Panel</button>
+            <button
+              className="btn"
+              style={{ border: '1px solid var(--border)', background: 'var(--bg)' }}
+              onClick={() => navigate('/admin/laporan')}
+            >
+              Admin Panel
+            </button>
           )}
-          <button onClick={handleLogout}>Logout</button>
+          <button className="btn btn-danger" onClick={handleLogout}>Logout</button>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 24 }}>
+        <CabangSelector />
+        <div className="kasir-grid">
           <ProdukPage />
           <CheckoutPage />
         </div>
@@ -59,7 +68,9 @@ function App() {
           path="/admin"
           element={
             <AdminRoute>
-              <AdminLayout />
+              <AdminCabangProvider>
+                <AdminLayout />
+              </AdminCabangProvider>
             </AdminRoute>
           }
         >

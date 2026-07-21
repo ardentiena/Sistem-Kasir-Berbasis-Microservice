@@ -1,4 +1,4 @@
-import "./PageTitle.css";
+import "../../styles/component.css";
 
 function PageTitle({
     title,

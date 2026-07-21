@@ -186,7 +186,7 @@ function ProdukAdminPage() {
             </tr>
           </thead>
           <tbody>
-            filteredProduk.map((p) => (
+            {filteredProduk.map((p) => (
               <tr key={p.id} style={{ borderBottom: '1px solid #222' }}>
                 <td>{p.namaProduk}</td>
                 <td>{p.kategori}</td>
@@ -197,7 +197,7 @@ function ProdukAdminPage() {
                   <Button variant="danger" onClick={() => handleDelete(p.id)}>Hapus</Button>
                 </td>
               </tr>
-            ))
+            ))}
           </tbody>
         </table>
       )}

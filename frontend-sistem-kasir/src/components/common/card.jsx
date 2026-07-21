@@ -1,4 +1,4 @@
-import "./Card.css";
+import "../../styles/component.css";
 
 function Card({ children }) {
     return (

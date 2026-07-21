@@ -1,5 +1,17 @@
 import { useEffect, useState } from 'react';
-import { getAllProduk, createProduk, updateProduk, deleteProduk } from '../../api/daftarProdukService';
+import {
+    getAllProduk,
+    createProduk,
+    updateProduk,
+    deleteProduk
+} from '../../api/daftarProdukService';
+
+import "../../styles/pages.css";
+
+import Button from "../../components/common/Button";
+import Card from "../../components/common/Card";
+import PageTitle from "../../components/common/PageTitle";
+import DataTable from "../../components/common/DataTable";
 
 function formatRupiah(value) {
   return `Rp${Number(value).toLocaleString('id-ID')}`;
@@ -13,7 +25,8 @@ function ProdukAdminPage() {
   const [error, setError] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [form, setForm] = useState(emptyForm);
+  const [search, setSearch] = useState("");
+  
 
   const loadProduk = () => {
     setLoading(true);
@@ -66,6 +79,12 @@ function ProdukAdminPage() {
     }
   };
 
+  const filteredProduk = produkList.filter((produk) =>
+    produk.namaProduk
+        .toLowerCase()
+        .includes(search.toLowerCase())
+  );
+
   const handleDelete = async (id) => {
     if (!confirm('Hapus produk ini?')) return;
     setError(null);
@@ -79,12 +98,31 @@ function ProdukAdminPage() {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2>Kelola Produk</h2>
-        <button onClick={openCreateForm}>+ Tambah Produk</button>
-      </div>
+      <PageTitle
+    title="Kelola Produk"
+    subtitle="Kelola seluruh data produk"
+/>
 
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+<Card>
+
+<div className="page-toolbar">
+
+    <input
+        className="search-input"
+        placeholder="Cari produk..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+    />
+
+    <Button onClick={openCreateForm}>
+
+        + Tambah Produk
+
+    </Button>
+
+</div>
+
+      {error && (<p className="error-message">{error}</p>)}
 
       {showForm && (
         <form onSubmit={handleSubmit} style={{ border: '1px solid #333', padding: 16, borderRadius: 8, marginTop: 12 }}>
@@ -148,21 +186,22 @@ function ProdukAdminPage() {
             </tr>
           </thead>
           <tbody>
-            {produkList.map((p) => (
+            filteredProduk.map((p) => (
               <tr key={p.id} style={{ borderBottom: '1px solid #222' }}>
                 <td>{p.namaProduk}</td>
                 <td>{p.kategori}</td>
                 <td>{formatRupiah(p.harga)}</td>
                 <td>{p.stok}</td>
                 <td>
-                  <button onClick={() => openEditForm(p)}>Edit</button>
-                  <button onClick={() => handleDelete(p.id)} style={{ marginLeft: 4 }}>Hapus</button>
+                  <button variant="success" onClick={() => openEditForm(p)}>Edit</button>
+                  <Button variant="danger" onClick={() => handleDelete(p.id)}>Hapus</Button>
                 </td>
               </tr>
-            ))}
+            ))
           </tbody>
         </table>
       )}
+      </Card>
     </div>
   );
 }

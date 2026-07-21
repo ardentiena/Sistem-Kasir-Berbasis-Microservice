@@ -5,8 +5,7 @@ export const createTransaksi = (data) => transaksiClient.post('/api/transactions
 
 export const getAllTransaksi = () => transaksiClient.get('/api/transactions');
 
-// GET /{id} TIDAK berubah — masih UUID, karena endpoint ini belum kita ubah
-export const getTransaksi = (id) => transaksiClient.get(`/api/transactions/${id}`);
+export const getTransaksi = (kodeTransaksi) => transaksiClient.get(`/api/transactions/${kodeTransaksi}`);
 
 // payload: { status: 'SELESAI' | 'PENDING' | ... }
 export const updateStatusTransaksi = (kodeTransaksi, data) =>

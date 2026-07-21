@@ -1,0 +1,264 @@
+.kasir-wrapper {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+.kasir-topbar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.kasir-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 800px) {
+  .kasir-grid { grid-template-columns: 1fr; }
+}
+
+/* Cabang selector */
+.cabang-box {
+  margin-bottom: 20px;
+  padding: 12px 16px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 14px;
+}
+
+.cabang-box select {
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  margin-left: 6px;
+}
+
+.cabang-warning {
+  color: var(--warning);
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+/* Produk grid */
+.produk-search {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 14px;
+  margin-bottom: 16px;
+  background: var(--bg);
+  color: var(--text);
+  outline: none;
+}
+
+.produk-search:focus {
+  border-color: var(--accent);
+}
+
+.produk-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+.produk-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.produk-card h4 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.produk-kategori {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.produk-harga {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.produk-stok {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+.produk-stok.habis {
+  color: var(--danger);
+}
+
+.produk-card button {
+  width: 100%;
+}
+
+/* Cart */
+.cart-box {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.cart-box h3 {
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+
+.cart-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.cart-item .cart-item-name {
+  flex: 1;
+}
+
+.cart-qty-btn {
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--border);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.cart-qty-btn:hover {
+  background: var(--bg-hover);
+}
+
+.cart-total {
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+  margin-top: 12px;
+  font-size: 15px;
+}
+
+.cart-empty {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+/* Checkout */
+.checkout-box {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.checkout-box h3 {
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.checkout-item-list {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0;
+  font-size: 14px;
+}
+
+.checkout-item-list li {
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.payment-form {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.payment-form input {
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 14px;
+  outline: none;
+}
+
+.payment-form input:focus {
+  border-color: var(--accent);
+}
+
+.payment-success {
+  color: var(--success);
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+/* Login */
+.login-wrapper {
+  max-width: 380px;
+  margin: 100px auto;
+  padding: 32px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+}
+
+.login-wrapper h2 {
+  margin-bottom: 24px;
+  font-size: 20px;
+  text-align: center;
+}
+
+.login-field {
+  margin-bottom: 16px;
+}
+
+.login-field label {
+  display: block;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.login-field input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 14px;
+  outline: none;
+}
+
+.login-field input:focus {
+  border-color: var(--accent);
+}
+
+.login-wrapper button[type="submit"] {
+  width: 100%;
+  padding: 11px;
+  margin-top: 4px;
+}

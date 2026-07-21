@@ -1,5 +1,6 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { logout } from "../../api/userService";
+import AdminCabangSelector from '../../components/admin/AdminCabangSelector';
 import "../../styles/layout.css";
 
 function AdminLayout() {
@@ -61,6 +62,18 @@ function AdminLayout() {
                         <p>Selamat datang di Sistem Kasir</p>
 
                     </div>
+                    <header className="header">
+                      <div>
+                          <h2>Dashboard</h2>
+                          <p>Selamat datang di Sistem Kasir</p>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                          <AdminCabangSelector /> {/* <-- tambahkan ini */}
+                          <div className="profile">
+                              <strong>Administrator</strong>
+                          </div>
+                      </div>
+                  </header>
 
                     <div className="profile">
 

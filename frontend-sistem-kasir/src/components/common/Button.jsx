@@ -1,4 +1,4 @@
-import "./Button.css";
+import "../../styles/component.css";
 
 function Button({
     children,

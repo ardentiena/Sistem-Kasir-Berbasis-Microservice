@@ -49,6 +49,7 @@ public class TransaksiService {
                 transaksi.getIdPembayaran(),
                 transaksi.getCreatedAt(),
                 transaksi.getKasirEmail(),
+                transaksi.getKodeCabang(),
                 transaksi.getStatus(),
                 detailTransaksiResponse,
                 transaksi.getGrandTotal()
@@ -100,6 +101,7 @@ public class TransaksiService {
                     transaksi.getIdPembayaran(),
                     transaksi.getCreatedAt(),
                     transaksi.getKasirEmail(),
+                    transaksi.getKodeCabang(),
                     transaksi.getStatus(),
                     listDetailTransaksiResponse,
                     transaksi.getGrandTotal()
@@ -201,8 +203,13 @@ public class TransaksiService {
 
         List<DetailTransaksiResponseDTO> detailResponse = getDetailTransaksiResponseDTOs(listDetailTransaksi);
         return new TransaksiResponseDTO(
-                transaksi.getId(), transaksi.getKodeTransaksi(), transaksi.getIdPembayaran(),
-                transaksi.getCreatedAt(), transaksi.getKasirEmail(), transaksi.getStatus(),
+                transaksi.getId(),
+                transaksi.getKodeTransaksi(),
+                transaksi.getIdPembayaran(),
+                transaksi.getCreatedAt(),
+                transaksi.getKasirEmail(),
+                transaksi.getKodeCabang(),
+                transaksi.getStatus(),
                 detailResponse, transaksi.getGrandTotal()
         );
     }

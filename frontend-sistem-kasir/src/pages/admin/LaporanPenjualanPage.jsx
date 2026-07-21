@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getAllTransaksi } from '../../api/transaksiJualService';
+import { useAdminCabang } from '../../context/AdminCabangContext';
 
 function formatRupiah(value) {
   return `Rp${Number(value).toLocaleString('id-ID')}`;
@@ -13,13 +14,11 @@ const PERIODE_LABEL = {
   tahunan: 'Tahunan',
 };
 
-// Hitung kunci pengelompokan + label tampilan + nilai urut, tergantung periode yang dipilih.
 function getPeriodeInfo(dateObj, periode) {
   const year = dateObj.getFullYear();
-  const month = dateObj.getMonth(); // 0-based
+  const month = dateObj.getMonth();
 
   if (periode === 'mingguan') {
-    // Hitung nomor minggu ISO (Senin sebagai awal minggu)
     const d = new Date(Date.UTC(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate()));
     const dayNum = d.getUTCDay() || 7;
     d.setUTCDate(d.getUTCDate() + 4 - dayNum);
@@ -44,7 +43,6 @@ function getPeriodeInfo(dateObj, periode) {
     return { key: `${year}`, label: `${year}`, sortValue: year };
   }
 
-  // default: harian
   return {
     key: dateObj.toISOString().slice(0, 10),
     label: dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }),
@@ -53,11 +51,10 @@ function getPeriodeInfo(dateObj, periode) {
 }
 
 function LaporanPenjualanPage() {
+  const { adminKodeCabang } = useAdminCabang();
   const [transaksiList, setTransaksiList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  // Baca preferensi periode dari Settings; default 'harian' kalau belum pernah diatur
   const [periode, setPeriode] = useState(localStorage.getItem('laporanPeriode') || 'harian');
 
   useEffect(() => {
@@ -68,14 +65,18 @@ function LaporanPenjualanPage() {
   }, []);
 
   const analytics = useMemo(() => {
-    const selesai = transaksiList.filter((t) => t.status === 'SELESAI');
+    const scoped = adminKodeCabang
+      ? transaksiList.filter((t) => t.kodeCabang === adminKodeCabang)
+      : transaksiList;
+
+    const selesai = scoped.filter((t) => t.status === 'SELESAI');
 
     const totalPendapatan = selesai.reduce((sum, t) => sum + Number(t.grandTotal), 0);
     const totalTransaksiSelesai = selesai.length;
     const rataRataTransaksi = totalTransaksiSelesai > 0 ? totalPendapatan / totalTransaksiSelesai : 0;
 
     const perStatus = {};
-    transaksiList.forEach((t) => {
+    scoped.forEach((t) => {
       perStatus[t.status] = (perStatus[t.status] || 0) + 1;
     });
 
@@ -94,7 +95,6 @@ function LaporanPenjualanPage() {
       .sort((a, b) => b.jumlah - a.jumlah)
       .slice(0, 10);
 
-    // Rekap pendapatan dikelompokkan sesuai periode yang dipilih
     const rekapMap = {};
     selesai.forEach((t) => {
       const info = getPeriodeInfo(new Date(t.createdAt), periode);
@@ -107,12 +107,11 @@ function LaporanPenjualanPage() {
     const maxRekap = Math.max(...rekapPeriode.map((d) => d.total), 1);
 
     return { totalPendapatan, totalTransaksiSelesai, rataRataTransaksi, perStatus, produkTerlaris, rekapPeriode, maxRekap };
-  }, [transaksiList, periode]);
+  }, [transaksiList, periode, adminKodeCabang]);
 
   if (loading) return <p>Memuat laporan...</p>;
   if (error) return <p style={{ color: 'red' }}>Error: {error}</p>;
 
-  // Susun titik-titik grafik garis dalam koordinat SVG
   const chartWidth = 600;
   const chartHeight = 160;
   const padding = 24;
@@ -172,12 +171,7 @@ function LaporanPenjualanPage() {
           <p style={{ color: '#888' }}>Belum ada transaksi selesai.</p>
         ) : (
           <svg viewBox={`0 0 ${chartWidth} ${chartHeight + 24}`} style={{ width: '100%', maxWidth: 700 }}>
-            <polyline
-              points={polylinePoints}
-              fill="none"
-              stroke="#4f8cff"
-              strokeWidth="2"
-            />
+            <polyline points={polylinePoints} fill="none" stroke="#4f8cff" strokeWidth="2" />
             {points.map((p) => (
               <g key={p.label + p.sortValue}>
                 <circle cx={p.x} cy={p.y} r="3.5" fill="#4f8cff">

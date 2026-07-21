@@ -19,6 +19,7 @@ public class TransaksiResponseDTO {
     private UUID idDetailPembayaran;
     private Date createdAt;
     private String kasirEmail;
+    private String kodeCabang;
     private Status status;
     private List<DetailTransaksiResponseDTO> items;
     private BigDecimal grandTotal;

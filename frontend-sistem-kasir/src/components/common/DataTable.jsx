@@ -1,4 +1,4 @@
-import "../../styles/components.css";
+import "../../styles/component.css";
 
 function DataTable({
     columns = [],

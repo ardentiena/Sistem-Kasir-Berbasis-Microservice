@@ -23,28 +23,26 @@ function CabangSelector() {
   }, []);
 
   if (loading) return <p>Memuat cabang...</p>;
-  if (error) return <p style={{ color: 'red' }}>Gagal memuat cabang: {error}</p>;
+  if (error) return <p className="error-message">Gagal memuat cabang: {error}</p>;
 
-  // Kasir dengan cabang sudah ditetapkan -> tampil read-only, tidak bisa diubah
   if (role !== 'ADMIN' && kodeCabangUser) {
     const namaCabang = cabangList.find((c) => c.kodeCabang === kodeCabangUser)?.namaCabang || kodeCabangUser;
     return (
-      <div style={{ marginBottom: 16 }}>
+      <div className="cabang-box">
         <strong>Cabang:</strong> {namaCabang}
       </div>
     );
   }
 
-  // Admin, atau kasir yang belum ditempatkan -> tetap bisa pilih manual
   return (
-    <div style={{ marginBottom: 16 }}>
+    <div className="cabang-box">
       {role !== 'ADMIN' && (
-        <p style={{ color: 'orange', fontSize: 13 }}>
+        <p className="cabang-warning">
           Kamu belum ditempatkan di cabang manapun. Pilih manual atau hubungi admin.
         </p>
       )}
       <label>
-        Cabang:{' '}
+        Cabang:
         <select value={kodeCabang} onChange={(e) => setKodeCabang(e.target.value)}>
           {cabangList.map((c) => (
             <option key={c.kodeCabang} value={c.kodeCabang}>{c.namaCabang}</option>

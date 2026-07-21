@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { createTransaksi, getTransaksi } from '../api/transaksiJualService';
+import { createTransaksi } from '../api/transaksiJualService';
 import { payTransaksi } from '../api/pembayaranService';
 import { useCart } from '../context/CartContext';
 import Cart from '../components/Cart';
@@ -49,9 +49,7 @@ function CheckoutPage() {
         totalBayar: Number(totalBayar),
       });
       setKembalian(resPembayaran.data.kembalian);
-
-      const resTransaksi = await getTransaksi(transaksi.id); // tetap UUID, endpoint GET belum berubah
-      setTransaksi(resTransaksi.data);
+      setTransaksi({ ...transaksi, status: 'SELESAI' });
       setShowPaymentForm(false);
     } catch (err) {
       setError(err.response?.data?.message || err.message);
@@ -64,16 +62,16 @@ function CheckoutPage() {
     return (
       <div>
         <Cart onCheckout={handleCheckout} checkoutLoading={loading} />
-        {error && <p style={{ color: 'red' }}>{error}</p>}
+        {error && <p className="error-message">{error}</p>}
       </div>
     );
   }
 
   return (
-    <div style={{ border: '1px solid #ddd', borderRadius: 8, padding: 12 }}>
+    <div className="checkout-box">
       <h3>Transaksi {transaksi.kodeTransaksi}</h3>
       <p>Status: <strong>{transaksi.status}</strong></p>
-      <ul>
+      <ul className="checkout-item-list">
         {transaksi.items.map((item) => (
           <li key={item.id}>
             {item.namaProduk} x{item.jumlah} — {formatRupiah(item.subtotal)}
@@ -83,12 +81,12 @@ function CheckoutPage() {
       <p><strong>Grand Total: {formatRupiah(transaksi.grandTotal)}</strong></p>
 
       {transaksi.status === 'PENDING' && !showPaymentForm && (
-        <button onClick={handleBayarClick}>Bayar</button>
+        <button className="btn btn-primary" onClick={handleBayarClick}>Bayar</button>
       )}
 
       {showPaymentForm && (
-        <form onSubmit={handleSubmitPembayaran} style={{ marginTop: 12 }}>
-          <p>Metode Bayar: TUNAI</p>
+        <form onSubmit={handleSubmitPembayaran} className="payment-form">
+          <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Metode Bayar: TUNAI</p>
           <input
             type="number"
             value={totalBayar}
@@ -96,7 +94,7 @@ function CheckoutPage() {
             placeholder="Total bayar"
             required
           />
-          <button type="submit" disabled={loading}>
+          <button type="submit" className="btn btn-primary" disabled={loading}>
             {loading ? 'Memproses...' : 'Konfirmasi Bayar'}
           </button>
         </form>
@@ -104,15 +102,15 @@ function CheckoutPage() {
 
       {transaksi.status === 'SELESAI' && (
         <div>
-          <p style={{ color: 'green' }}>Pembayaran berhasil!</p>
+          <p className="payment-success">Pembayaran berhasil!</p>
           {kembalian != null && <p>Kembalian: {formatRupiah(kembalian)}</p>}
-          <button onClick={() => { setTransaksi(null); setKembalian(null); }}>
+          <button className="btn btn-primary" style={{ marginTop: 8 }} onClick={() => { setTransaksi(null); setKembalian(null); }}>
             Transaksi Baru
           </button>
         </div>
       )}
 
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {error && <p className="error-message">{error}</p>}
     </div>
   );
 }

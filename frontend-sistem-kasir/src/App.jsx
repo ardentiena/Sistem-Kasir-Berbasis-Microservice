@@ -13,6 +13,7 @@ import PembayaranListPage from './pages/admin/PembayaranListPage';
 import LaporanPenjualanPage from './pages/admin/LaporanPenjualanPage';
 import SettingsPage from './pages/admin/SettingsPage';
 import { logout } from './api/userService';
+import DashboardPage from "./pages/admin/DashboardPage";
 
 function KasirLandingPage() {
   const navigate = useNavigate();
@@ -62,7 +63,8 @@ function App() {
             </AdminRoute>
           }
         >
-          <Route index element={<Navigate to="laporan" replace />} />
+          <Route index element={<DashboardPage />} />
+          <Route path="dashboard" element={<DashboardPage />} />
           <Route path="kasir" element={<KasirPage />} />
           <Route path="produk" element={<ProdukAdminPage />} />
           <Route path="transaksi" element={<TransaksiListPage />} />

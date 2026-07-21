@@ -1,0 +1,123 @@
+.btn{
+
+    border:none;
+
+    border-radius:10px;
+
+    padding:12px 20px;
+
+    cursor:pointer;
+
+    font-size:15px;
+
+    font-weight:600;
+
+    transition:.25s;
+}
+
+.btn-primary{
+
+    background:#2563EB;
+
+    color:white;
+}
+
+.btn-primary:hover{
+
+    background:#1D4ED8;
+}
+
+.btn-danger{
+
+    background:#DC2626;
+
+    color:white;
+}
+
+.btn-danger:hover{
+
+    background:#B91C1C;
+}
+
+.btn-success{
+
+    background:#16A34A;
+
+    color:white;
+}
+
+.btn-success:hover{
+
+    background:#15803D;
+}
+
+.card{
+
+    background:white;
+
+    border-radius:14px;
+
+    padding:20px;
+
+    box-shadow:0 3px 10px rgba(0,0,0,.08);
+
+}
+
+.page-title{
+
+    margin-bottom:24px;
+}
+
+.page-title h1{
+
+    font-size:30px;
+}
+
+.page-title p{
+
+    margin-top:6px;
+
+    color:#64748B;
+}
+
+.data-table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+    margin-top:20px;
+
+}
+
+.data-table th{
+
+    background:#F8FAFC;
+
+    padding:14px;
+
+    text-align:left;
+
+    border-bottom:2px solid #E2E8F0;
+}
+
+.data-table td{
+
+    padding:14px;
+
+    border-bottom:1px solid #E2E8F0;
+}
+
+.data-table tbody tr:hover{
+
+    background:#F8FAFC;
+}
+
+.empty-cell{
+
+    text-align:center;
+
+    color:#64748B;
+
+    padding:30px !important;
+}

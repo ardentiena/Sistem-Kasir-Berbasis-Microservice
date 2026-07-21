@@ -3,50 +3,52 @@ import { createContext, useContext, useState } from 'react';
 const CartContext = createContext(null);
 
 export function CartProvider({ children }) {
-  // items: [{ produkId, namaProduk, harga, jumlah }]
+  // items: [{ produkId, kodeProduk, namaProduk, harga, jumlah }]
   const [items, setItems] = useState([]);
+  const [kodeCabang, setKodeCabang] = useState(localStorage.getItem('kodeCabang') || '');
 
   const addItem = (produk) => {
     setItems((prev) => {
-      const existing = prev.find((i) => i.produkId === produk.id);
+      const existing = prev.find((i) => i.kodeProduk === produk.kodeProduk);
       if (existing) {
         return prev.map((i) =>
-          i.produkId === produk.id ? { ...i, jumlah: i.jumlah + 1 } : i
+          i.kodeProduk === produk.kodeProduk ? { ...i, jumlah: i.jumlah + 1 } : i
         );
       }
       return [
         ...prev,
-        { produkId: produk.id, namaProduk: produk.namaProduk, harga: produk.harga, jumlah: 1 },
+        { produkId: produk.id, kodeProduk: produk.kodeProduk, namaProduk: produk.namaProduk, harga: produk.harga, jumlah: 1 },
       ];
     });
   };
 
-  const updateJumlah = (produkId, jumlah) => {
+  const updateJumlah = (kodeProduk, jumlah) => {
     if (jumlah <= 0) {
-      removeItem(produkId);
+      removeItem(kodeProduk);
       return;
     }
     setItems((prev) =>
-      prev.map((i) => (i.produkId === produkId ? { ...i, jumlah } : i))
+      prev.map((i) => (i.kodeProduk === kodeProduk ? { ...i, jumlah } : i))
     );
   };
 
-  const removeItem = (produkId) => {
-    setItems((prev) => prev.filter((i) => i.produkId !== produkId));
+  const removeItem = (kodeProduk) => {
+    setItems((prev) => prev.filter((i) => i.kodeProduk !== kodeProduk));
   };
 
   const clearCart = () => setItems([]);
 
   const total = items.reduce((sum, i) => sum + Number(i.harga) * i.jumlah, 0);
 
-  // Payload siap kirim ke createTransaksi: { produkList: [{ produkId, jumlah }] }
-  const toProdukList = () => ({
-    produkList: items.map((i) => ({ produkId: i.produkId, jumlah: i.jumlah })),
+  // Payload siap kirim ke createTransaksi: { kodeCabang, produkList: [{ kodeProduk, jumlah }] }
+  const toTransaksiPayload = () => ({
+    kodeCabang,
+    produkList: items.map((i) => ({ kodeProduk: i.kodeProduk, jumlah: i.jumlah })),
   });
 
   return (
     <CartContext.Provider
-      value={{ items, addItem, updateJumlah, removeItem, clearCart, total, toProdukList }}
+      value={{ items, addItem, updateJumlah, removeItem, clearCart, total, toTransaksiPayload, kodeCabang, setKodeCabang }}
     >
       {children}
     </CartContext.Provider>

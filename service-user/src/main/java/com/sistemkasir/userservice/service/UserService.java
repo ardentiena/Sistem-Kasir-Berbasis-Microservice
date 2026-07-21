@@ -106,10 +106,10 @@ public class UserService {
                 .toList();
     }
 
-    public UserResponseDTO getUserById(UUID id) {
+    public UserResponseDTO getUserByKodePegawai(String kodePegawai) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        User userId = findUserById(id);
+        User userId = findUserByKodePegawai(kodePegawai);
         User userEmail = findUserByEmail(email);
 
         if (!userEmail.getUserId().equals(userId.getUserId()) && !"ADMIN".equalsIgnoreCase(userEmail.getRole())) {
@@ -120,8 +120,8 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponseDTO updateUser(UUID id, UserRequestDTO updateUserRequest) {
-        User user = findUserById(id);
+    public UserResponseDTO updateUser(String kodePegawai, UserRequestDTO updateUserRequest) {
+        User user = findUserByKodePegawai(kodePegawai);
         user.setRole(updateUserRequest.getRole());
         user.setNamaDepan(updateUserRequest.getNamaDepan());
         user.setNamaBelakang(updateUserRequest.getNamaBelakang());
@@ -131,8 +131,8 @@ public class UserService {
         return mapToResponseDTO(user);
     }
 
-    public String deleteUser(UUID id) {
-        User user = findUserById(id);
+    public String deleteUser(String kodePegawai) {
+        User user = findUserByKodePegawai(kodePegawai);
         userRepository.delete(user);
         return "User berhasil dihapus";
     }
@@ -156,8 +156,8 @@ public class UserService {
         return (user.getCabang() != null) ? user.getCabang().getKodeCabang() : null;
     }
 
-    private User findUserById(UUID id) {
-        return userRepository.findById(id)
+    private User findUserByKodePegawai(String kodePegawai) {
+        return userRepository.findByKodePegawai(kodePegawai)
                 .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
     }
 

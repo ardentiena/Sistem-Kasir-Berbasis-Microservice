@@ -36,20 +36,25 @@ public class CabangController {
         return ResponseEntity.ok(cabangService.getAllAktif());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<CabangResponseDTO> getById(@PathVariable UUID id) {
-        return ResponseEntity.ok(cabangService.getById(id));
+    @GetMapping("/{kodeCabang}")
+    public ResponseEntity<CabangResponseDTO> getById(@PathVariable String kodeCabang) {
+        return ResponseEntity.ok(cabangService.getByKodeCabang(kodeCabang));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<CabangResponseDTO> update(@PathVariable UUID id,
+    @PutMapping("/{kodeCabang}")
+    public ResponseEntity<CabangResponseDTO> update(@PathVariable String kodeCabang,
                                                     @Valid @RequestBody CabangRequestDTO request) {
-        return ResponseEntity.ok(cabangService.update(id, request));
+        return ResponseEntity.ok(cabangService.update(kodeCabang, request));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable UUID id) {
-        cabangService.softDelete(id);
+    @DeleteMapping("/{kodeCabang}")
+    public ResponseEntity<Void> delete(@PathVariable String kodeCabang) {
+        cabangService.softDelete(kodeCabang);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/pilihan")
+    public ResponseEntity<List<CabangResponseDTO>> getCabangPilihan() {
+        return ResponseEntity.ok(cabangService.getAllAktif());
     }
 }

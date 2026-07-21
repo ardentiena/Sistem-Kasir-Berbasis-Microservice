@@ -43,6 +43,15 @@ public class JwtUtil {
                 .getSubject();
     }
 
+    public String getCabangFromToken(String token){
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningkey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("cabang", String.class);
+    }
+
     private SecretKey getSigningkey(){
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);

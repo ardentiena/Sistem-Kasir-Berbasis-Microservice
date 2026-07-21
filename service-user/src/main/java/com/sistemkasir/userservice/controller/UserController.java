@@ -42,16 +42,16 @@ public class UserController {
     public ResponseEntity<List<UserResponseDTO>> getAllUser(){
         return ResponseEntity.ok(userService.getAllUser());
     }
-    @GetMapping("/users/{id}")
-    public ResponseEntity<UserResponseDTO> getUser(@PathVariable UUID id){
-        return ResponseEntity.ok(userService.getUserById(id));
+    @GetMapping("/users/{kodePegawai}")
+    public ResponseEntity<UserResponseDTO> getUser(@PathVariable String kodePegawai){
+        return ResponseEntity.ok(userService.getUserByKodePegawai(kodePegawai));
     }
-    @PutMapping("/users/{id}")
-    public ResponseEntity<UserResponseDTO> updateUser(@PathVariable UUID id, @RequestBody UserRequestDTO updateRequest){
-        return ResponseEntity.ok(userService.updateUser(id, updateRequest));
+    @PutMapping("/users/{kodePegawai}")
+    public ResponseEntity<UserResponseDTO> updateUser(@PathVariable String kodePegawai, @RequestBody UserRequestDTO updateRequest){
+        return ResponseEntity.ok(userService.updateUser(kodePegawai, updateRequest));
     }
-    @DeleteMapping("/users/{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable UUID id){
-        return ResponseEntity.ok(userService.deleteUser(id));
+    @DeleteMapping("/users/{kodePegawai}")
+    public ResponseEntity<String> deleteUser(@PathVariable String kodePegawai){
+        return ResponseEntity.ok(userService.deleteUser(kodePegawai));
     }
 }

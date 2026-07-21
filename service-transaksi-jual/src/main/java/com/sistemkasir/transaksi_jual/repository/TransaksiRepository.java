@@ -12,4 +12,5 @@ import org.springframework.stereotype.Repository;
 public interface TransaksiRepository extends JpaRepository<Transaksi, UUID> {
     List<Transaksi> findByKasirEmail(String kasirEmail);
     Optional<Transaksi> findByKodeTransaksi(String kodeTransaksi);
+    List<Transaksi> findByKodeCabang(String kodeCabang);
 }

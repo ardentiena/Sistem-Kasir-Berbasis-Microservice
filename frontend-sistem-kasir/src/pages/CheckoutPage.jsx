@@ -9,24 +9,27 @@ function formatRupiah(value) {
 }
 
 function CheckoutPage() {
-  const { toProdukList, clearCart } = useCart();
+  const { toTransaksiPayload, clearCart, kodeCabang } = useCart();
 
-  const [transaksi, setTransaksi] = useState(null); // TransaksiResponseDTO lengkap
+  const [transaksi, setTransaksi] = useState(null);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [totalBayar, setTotalBayar] = useState('');
-  const [kembalian, setKembalian] = useState(null); // dari ResponsePembayaranDTO
+  const [kembalian, setKembalian] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const handleCheckout = async () => {
+    if (!kodeCabang) {
+      setError('Pilih cabang terlebih dahulu.');
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
-      const payload = toProdukList(); // { produkList: [{ produkId, jumlah }] }
-      const res = await createTransaksi(payload);
-      setTransaksi(res.data); // sudah termasuk idDetailPembayaran, items, grandTotal, status PENDING
+      const res = await createTransaksi(toTransaksiPayload());
+      setTransaksi(res.data);
       setTotalBayar(res.data.grandTotal);
-      clearCart(); // stok sudah dicek & "dipesan" di backend, keranjang lokal dikosongkan
+      clearCart();
     } catch (err) {
       setError(err.response?.data?.message || err.message);
     } finally {
@@ -41,16 +44,13 @@ function CheckoutPage() {
     setLoading(true);
     setError(null);
     try {
-      // ResponsePembayaranDTO: { idPembayaran, jumlahBayar, kembalian, status, callbackBerhasil, createdAt }
-      const resPembayaran = await payTransaksi(transaksi.idDetailPembayaran, {
+      const resPembayaran = await payTransaksi(transaksi.kodeTransaksi, {
         metodeBayar: 'TUNAI',
         totalBayar: Number(totalBayar),
       });
       setKembalian(resPembayaran.data.kembalian);
 
-      // Refetch transaksi supaya status yang ditampilkan benar-benar dari backend
-      // (bukan diasumsikan SELESAI di frontend)
-      const resTransaksi = await getTransaksi(transaksi.id);
+      const resTransaksi = await getTransaksi(transaksi.id); // tetap UUID, endpoint GET belum berubah
       setTransaksi(resTransaksi.data);
       setShowPaymentForm(false);
     } catch (err) {
@@ -60,7 +60,6 @@ function CheckoutPage() {
     }
   };
 
-  // Belum ada transaksi berjalan -> tampilkan keranjang untuk checkout
   if (!transaksi) {
     return (
       <div>
@@ -70,10 +69,9 @@ function CheckoutPage() {
     );
   }
 
-  // Ada transaksi berjalan -> tampilkan detail + status
   return (
     <div style={{ border: '1px solid #ddd', borderRadius: 8, padding: 12 }}>
-      <h3>Transaksi #{transaksi.id}</h3>
+      <h3>Transaksi {transaksi.kodeTransaksi}</h3>
       <p>Status: <strong>{transaksi.status}</strong></p>
       <ul>
         {transaksi.items.map((item) => (
@@ -108,12 +106,7 @@ function CheckoutPage() {
         <div>
           <p style={{ color: 'green' }}>Pembayaran berhasil!</p>
           {kembalian != null && <p>Kembalian: {formatRupiah(kembalian)}</p>}
-          <button
-            onClick={() => {
-              setTransaksi(null);
-              setKembalian(null);
-            }}
-          >
+          <button onClick={() => { setTransaksi(null); setKembalian(null); }}>
             Transaksi Baru
           </button>
         </div>

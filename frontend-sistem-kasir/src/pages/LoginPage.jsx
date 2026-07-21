@@ -14,7 +14,7 @@ function LoginPage() {
     setLoading(true);
     setError(null);
     try {
-      await login({ email, password }); // sesuaikan field ini dengan LoginUserDTO kamu
+      await login({ email, password });
       navigate('/');
     } catch (err) {
       setError(err.response?.data?.message || 'Login gagal, cek email/password.');

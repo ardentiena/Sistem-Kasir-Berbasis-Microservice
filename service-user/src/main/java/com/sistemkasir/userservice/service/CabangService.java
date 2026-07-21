@@ -41,14 +41,14 @@ public class CabangService {
                 .toList();
     }
 
-    public CabangResponseDTO getById(UUID id) {
-        Cabang cabang = cabangRepository.findById(id)
+    public CabangResponseDTO getByKodeCabang(String kodeCabang) {
+        Cabang cabang = cabangRepository.findByKodeCabang(kodeCabang)
                 .orElseThrow(() -> new IllegalArgumentException("Cabang tidak ditemukan"));
         return toResponseDTO(cabang);
     }
 
-    public CabangResponseDTO update(UUID id, CabangRequestDTO request) {
-        Cabang cabang = cabangRepository.findById(id)
+    public CabangResponseDTO update(String kodeCabang, CabangRequestDTO request) {
+        Cabang cabang = cabangRepository.findByKodeCabang(kodeCabang)
                 .orElseThrow(() -> new IllegalArgumentException("Cabang tidak ditemukan"));
 
         // Cegah kodeCabang diganti ke kode yang sudah dipakai cabang lain
@@ -63,8 +63,8 @@ public class CabangService {
         return toResponseDTO(cabangRepository.save(cabang));
     }
 
-    public void softDelete(UUID id) {
-        Cabang cabang = cabangRepository.findById(id)
+    public void softDelete(String kodeCabang) {
+        Cabang cabang = cabangRepository.findByKodeCabang(kodeCabang)
                 .orElseThrow(() -> new IllegalArgumentException("Cabang tidak ditemukan"));
         cabang.setAktif(false);
         cabangRepository.save(cabang);

@@ -2,6 +2,7 @@ package com.sistemkasir.transaksi_jual.service;
 
 import com.sistemkasir.transaksi_jual.config.DaftarProdukClient;
 import com.sistemkasir.transaksi_jual.config.PembayaranClient;
+import com.sistemkasir.transaksi_jual.config.UserDetailsPrincipals;
 import com.sistemkasir.transaksi_jual.dto.*;
 import com.sistemkasir.transaksi_jual.enumeration.Status;
 import com.sistemkasir.transaksi_jual.model.DetailTransaksi;
@@ -12,6 +13,7 @@ import lombok.AllArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -70,14 +72,21 @@ public class TransaksiService {
     }
 
     public List<TransaksiResponseDTO> getAllTransaksi(){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String role = Objects.requireNonNull(
-                SecurityContextHolder.getContext().getAuthentication())
+                auth)
                 .getAuthorities().iterator().next().getAuthority();
-        String email = Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getName();
+        String email = Objects.requireNonNull(auth).getName();
+        String cabang = null;
+        if (auth.getPrincipal() instanceof UserDetailsPrincipals userDetails) {
+            cabang = userDetails.getKodeCabang();
+        }
 
         List<Transaksi> listTransaksi;
         if(!Objects.equals(role, "ROLE_ADMIN")){
             listTransaksi = transaksiRepository.findByKasirEmail(email);
+        }else if (cabang != null && !cabang.isBlank()) {
+            listTransaksi = transaksiRepository.findByKodeCabang(cabang);
         }else{
             listTransaksi = transaksiRepository.findAll();
         }

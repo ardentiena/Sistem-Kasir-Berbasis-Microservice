@@ -9,6 +9,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -31,16 +32,17 @@ public class JwtAuthFilter extends OncePerRequestFilter{
 
         if(authHeader != null && authHeader.startsWith("Bearer")){
             String token = authHeader.substring(7);
-            boolean isValid = jwtUtil.validateToken(token);
-            System.out.println("DEBUG - isValid: " + isValid);
-            if(isValid){
+            if(jwtUtil.validateToken(token)){
                 String email = jwtUtil.getEmailFromToken(token);
                 String role = jwtUtil.getRoleFromToken(token);
-                System.out.println("DEBUG - email: " + email + ", role: " + role);
+                String cabang = jwtUtil.getCabangFromToken(token);
+                System.out.println("DEBUG - email: " + email + ", role: " + role +  ", cabang: " + cabang);
                 List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
+                UserDetailsPrincipals userDetailsPrincipals = new UserDetailsPrincipals(email, cabang, authorities);
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        email, null, authorities
+                        userDetailsPrincipals, null, authorities
                 );
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
                 System.out.println("DEBUG - authorities set: " + authorities);
             }

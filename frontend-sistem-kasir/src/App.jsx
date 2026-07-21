@@ -13,6 +13,7 @@ import PembayaranListPage from './pages/admin/PembayaranListPage';
 import LaporanPenjualanPage from './pages/admin/LaporanPenjualanPage';
 import SettingsPage from './pages/admin/SettingsPage';
 import { logout } from './api/userService';
+import CabangSelector from './components/CabangSelector';
 
 function KasirLandingPage() {
   const navigate = useNavigate();
@@ -27,11 +28,10 @@ function KasirLandingPage() {
     <CartProvider>
       <div style={{ maxWidth: 900, margin: '0 auto', padding: 16 }}>
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginBottom: 12 }}>
-          {role === 'ADMIN' && (
-            <button onClick={() => navigate('/admin/laporan')}>Admin Panel</button>
-          )}
+          {role === 'ADMIN' && <button onClick={() => navigate('/admin/laporan')}>Admin Panel</button>}
           <button onClick={handleLogout}>Logout</button>
         </div>
+        <CabangSelector />
         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 24 }}>
           <ProdukPage />
           <CheckoutPage />

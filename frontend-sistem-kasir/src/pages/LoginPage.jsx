@@ -26,6 +26,9 @@ function LoginPage() {
 
   return (
     <div className="login-wrapper">
+      <div className="window-dots">
+        <span></span><span></span><span></span>
+      </div>
       <h2>Login Kasir</h2>
       <form onSubmit={handleSubmit}>
         <div className="login-field">

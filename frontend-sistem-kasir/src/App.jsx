@@ -30,6 +30,9 @@ function KasirLandingPage() {
     <CartProvider>
       <div className="kasir-wrapper">
         <div className="kasir-topbar">
+          <div className="window-dots">
+            <span></span><span></span><span></span>
+          </div>
           {role === 'ADMIN' && (
             <button
               className="btn"

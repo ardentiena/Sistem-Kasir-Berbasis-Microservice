@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
 import { getAllUser, register, updateUser, deleteUser } from '../../api/userService';
+import Button from '../../components/common/Button';
+import Card from '../../components/common/Card';
+import PageTitle from '../../components/common/PageTitle';
 
 const emptyForm = { role: 'KASIR', namaDepan: '', namaBelakang: '', email: '', password: '' };
 
@@ -46,11 +49,9 @@ function KasirPage() {
     setError(null);
     try {
       if (editingId) {
-        // UserRequestDTO: { role, namaDepan, namaBelakang, email }
         const { role, namaDepan, namaBelakang, email } = form;
         await updateUser(editingId, { role, namaDepan, namaBelakang, email });
       } else {
-        // RegisterUserDTO: { role, namaDepan, namaBelakang, email, password }
         await register(form);
       }
       setShowForm(false);
@@ -73,99 +74,111 @@ function KasirPage() {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2>Kelola Kasir</h2>
-        <button onClick={openCreateForm}>+ Tambah Kasir</button>
-      </div>
+      <PageTitle title="Kelola Kasir" subtitle="Kelola data akun kasir dan admin" />
 
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      <Card>
+        <div className="page-toolbar" style={{ justifyContent: 'flex-end' }}>
+          <Button onClick={openCreateForm}>+ Tambah Kasir</Button>
+        </div>
 
-      {showForm && (
-        <form onSubmit={handleSubmit} style={{ border: '1px solid #333', padding: 16, borderRadius: 8, marginTop: 12 }}>
-          <h4>{editingId ? 'Edit Kasir' : 'Tambah Kasir'}</h4>
-          <div style={{ display: 'grid', gap: 8, maxWidth: 320 }}>
-            <label>
-              Nama Depan
-              <input
-                value={form.namaDepan}
-                onChange={(e) => setForm({ ...form, namaDepan: e.target.value })}
-                required
-              />
-            </label>
-            <label>
-              Nama Belakang
-              <input
-                value={form.namaBelakang}
-                onChange={(e) => setForm({ ...form, namaBelakang: e.target.value })}
-                required
-              />
-            </label>
-            <label>
-              Email
-              <input
-                type="email"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                required
-              />
-            </label>
-            {!editingId && (
+        {error && <p className="error-message">{error}</p>}
+
+        {showForm && (
+          <form onSubmit={handleSubmit} className="form-panel">
+            <h4>{editingId ? 'Edit Kasir' : 'Tambah Kasir'}</h4>
+            <div className="form-grid">
               <label>
-                Password
+                Nama Depan
                 <input
-                  type="password"
-                  value={form.password}
-                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  value={form.namaDepan}
+                  onChange={(e) => setForm({ ...form, namaDepan: e.target.value })}
                   required
                 />
               </label>
-            )}
-            <label>
-              Role
-              <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}>
-                <option value="KASIR">KASIR</option>
-                <option value="ADMIN">ADMIN</option>
-              </select>
-            </label>
-          </div>
-          <div style={{ marginTop: 12 }}>
-            <button type="submit">{editingId ? 'Simpan Perubahan' : 'Buat Kasir'}</button>
-            <button type="button" onClick={() => setShowForm(false)} style={{ marginLeft: 8 }}>
-              Batal
-            </button>
-          </div>
-        </form>
-      )}
+              <label>
+                Nama Belakang
+                <input
+                  value={form.namaBelakang}
+                  onChange={(e) => setForm({ ...form, namaBelakang: e.target.value })}
+                  required
+                />
+              </label>
+              <label>
+                Email
+                <input
+                  type="email"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  required
+                />
+              </label>
+              {!editingId && (
+                <label>
+                  Password
+                  <input
+                    type="password"
+                    value={form.password}
+                    onChange={(e) => setForm({ ...form, password: e.target.value })}
+                    required
+                  />
+                </label>
+              )}
+              <label>
+                Role
+                <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}>
+                  <option value="KASIR">KASIR</option>
+                  <option value="ADMIN">ADMIN</option>
+                </select>
+              </label>
+            </div>
+            <div className="form-actions">
+              <Button type="submit">{editingId ? 'Simpan Perubahan' : 'Buat Kasir'}</Button>
+              <Button type="button" variant="secondary" onClick={() => setShowForm(false)}>
+                Batal
+              </Button>
+            </div>
+          </form>
+        )}
 
-      {loading ? (
-        <p>Memuat...</p>
-      ) : (
-        <table style={{ width: '100%', marginTop: 16, borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ textAlign: 'left', borderBottom: '1px solid #333' }}>
-              <th>Nama</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Status</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((u) => (
-              <tr key={u.id} style={{ borderBottom: '1px solid #222' }}>
-                <td>{u.namaDepan} {u.namaBelakang}</td>
-                <td>{u.email}</td>
-                <td>{u.role}</td>
-                <td>{u.isActive ? 'Aktif' : 'Nonaktif'}</td>
-                <td>
-                  <button onClick={() => openEditForm(u)}>Edit</button>
-                  <button onClick={() => handleDelete(u.id)} style={{ marginLeft: 4 }}>Hapus</button>
-                </td>
+        {loading ? (
+          <p>Memuat...</p>
+        ) : (
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Nama</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th></th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+            </thead>
+            <tbody>
+              {users.length === 0 && (
+                <tr><td colSpan={5} className="empty-cell">Tidak ada kasir</td></tr>
+              )}
+              {users.map((u) => (
+                <tr key={u.id}>
+                  <td>{u.namaDepan} {u.namaBelakang}</td>
+                  <td>{u.email}</td>
+                  <td><span className="badge badge-info">{u.role}</span></td>
+                  <td>
+                    {u.isActive
+                      ? <span className="badge badge-success">Aktif</span>
+                      : <span className="badge badge-neutral">Nonaktif</span>}
+                  </td>
+                  <td>
+                    <div className="row-actions">
+                      <Button variant="secondary" onClick={() => openEditForm(u)}>Edit</Button>
+                      <Button variant="danger" onClick={() => handleDelete(u.id)}>Hapus</Button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </Card>
     </div>
   );
 }

@@ -40,44 +40,48 @@ function ProdukPage() {
   };
 
   return (
-    <div>
-      <h2>Daftar Produk</h2>
+    <div className="produk-page">
+      <div className="produk-page-header">
+        <h2>Daftar Produk</h2>
 
-      <input
-        type="text"
-        className="produk-search"
-        placeholder="Cari nama produk..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
+        <input
+          type="text"
+          className="produk-search"
+          placeholder="Cari nama produk..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
 
-      {error && <p className="error-message">Error: {error}</p>}
+        {error && <p className="error-message">Error: {error}</p>}
+      </div>
 
-      {loading ? (
-        <p>Memuat produk...</p>
-      ) : produkList.length === 0 ? (
-        <p style={{ color: 'var(--text-secondary)' }}>Produk tidak ditemukan.</p>
-      ) : (
-        <div className="produk-grid">
-          {produkList.map((produk) => {
-            const sisaStok = getSisaStok(produk);
-            const habis = sisaStok <= 0;
-            return (
-              <div key={produk.id} className="produk-card">
-                <h4>{produk.namaProduk}</h4>
-                <p className="produk-kategori">{produk.kategori}</p>
-                <p className="produk-harga">{formatRupiah(produk.harga)}</p>
-                <p className={`produk-stok ${habis ? 'habis' : ''}`}>
-                  Stok: {sisaStok < 0 ? 0 : sisaStok}
-                </p>
-                <button className="btn btn-primary" onClick={() => addItem(produk)} disabled={habis}>
-                  {habis ? 'Stok Habis' : '+ Tambah ke Keranjang'}
-                </button>
-              </div>
-            );
-          })}
-        </div>
-      )}
+      <div className="produk-page-scroll">
+        {loading ? (
+          <p>Memuat produk...</p>
+        ) : produkList.length === 0 ? (
+          <p style={{ color: 'var(--text-secondary)' }}>Produk tidak ditemukan.</p>
+        ) : (
+          <div className="produk-grid">
+            {produkList.map((produk) => {
+              const sisaStok = getSisaStok(produk);
+              const habis = sisaStok <= 0;
+              return (
+                <div key={produk.id} className="produk-card">
+                  <h4>{produk.namaProduk}</h4>
+                  <p className="produk-kategori">{produk.kategori}</p>
+                  <p className="produk-harga">{formatRupiah(produk.harga)}</p>
+                  <p className={`produk-stok ${habis ? 'habis' : ''}`}>
+                    Stok: {sisaStok < 0 ? 0 : sisaStok}
+                  </p>
+                  <button className="btn btn-primary" onClick={() => addItem(produk)} disabled={habis}>
+                    {habis ? 'Stok Habis' : '+ Tambah ke Keranjang'}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

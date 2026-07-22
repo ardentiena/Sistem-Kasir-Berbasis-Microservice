@@ -41,16 +41,17 @@ public class UserService {
         newUser.setNamaDepan(userRegister.getNamaDepan());
         newUser.setNamaBelakang(userRegister.getNamaBelakang());
         newUser.setEmail(userRegister.getEmail());
-        newUser.setPassword(passwordEncoder.encode(userRegister.getPassword()));
         newUser.setRole(userRegister.getRole());
         newUser.setCabang(cabang);
         newUser.setIsActive(true);
+        newUser.setHarusGantiPassword(true);
+        // Placeholder sementara — kolom NOT NULL, ditimpa setelah kodePegawai diketahui
+        newUser.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
 
-        newUser = userRepository.saveAndFlush(newUser);
+        newUser = userRepository.saveAndFlush(newUser); // save #1 -> dapat nomorUrut
 
         String tanggal = new SimpleDateFormat("yyyyMMdd").format(new Date());
         String idPegawai;
-
         if ("ADMIN".equalsIgnoreCase(userRegister.getRole())) {
             idPegawai = String.format("ADM%s%04d", tanggal, newUser.getNomorUrut());
         } else {
@@ -59,9 +60,22 @@ public class UserService {
         }
 
         newUser.setKodePegawai(idPegawai);
-        userRepository.save(newUser);
+        newUser.setPassword(passwordEncoder.encode(idPegawai)); // password awal = idPegawai
+        userRepository.save(newUser); // save #2
 
         return mapToResponseDTO(newUser);
+    }
+
+    @Transactional
+    public void gantiPassword(SetPasswordDTO dto) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = findUserByEmail(email);
+        if (dto.getPasswordBaru() == null || dto.getPasswordBaru().isBlank()) {
+            throw new RuntimeException("Password baru tidak boleh kosong");
+        }
+        user.setPassword(passwordEncoder.encode(dto.getPasswordBaru()));
+        user.setHarusGantiPassword(false);
+        userRepository.save(user);
     }
 
     public String login(LoginUserDTO userLogin) {

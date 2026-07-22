@@ -114,7 +114,27 @@ function LaporanPenjualanPage() {
     const rekapPeriode = Object.values(rekapMap).sort((a, b) => a.sortValue - b.sortValue);
     const maxRekap = Math.max(...rekapPeriode.map((d) => d.total), 1);
 
-    return { totalPendapatan, totalTransaksiSelesai, rataRataTransaksi, perStatus, produkTerlaris, rekapPeriode, maxRekap };
+    const today = new Date();
+    const isSameDay = (d) =>
+      d.getFullYear() === today.getFullYear()
+      && d.getMonth() === today.getMonth()
+      && d.getDate() === today.getDate();
+
+    const perJam = Array.from({ length: 24 }, (_, jam) => ({ jam, jumlahTransaksi: 0, total: 0 }));
+    selesai
+      .filter((t) => isSameDay(new Date(t.createdAt)))
+      .forEach((t) => {
+        const jam = new Date(t.createdAt).getHours();
+        perJam[jam].jumlahTransaksi += 1;
+        perJam[jam].total += Number(t.grandTotal);
+      });
+    const maxPerJam = Math.max(...perJam.map((j) => j.jumlahTransaksi), 1);
+
+    return {
+      totalPendapatan, totalTransaksiSelesai, rataRataTransaksi,
+      perStatus, produkTerlaris, rekapPeriode, maxRekap,
+      perJam, maxPerJam,
+    };
   }, [transaksiList, periode, adminKodeCabang]);
 
   if (loading) return <p>Memuat laporan...</p>;
@@ -122,15 +142,68 @@ function LaporanPenjualanPage() {
 
   const chartWidth = 600;
   const chartHeight = 160;
-  const padding = 24;
+  const paddingLeft = 64;
+  const paddingRight = 16;
+  const paddingTop = 16;
+  const paddingBottom = 24;
+  const plotWidth = chartWidth - paddingLeft - paddingRight;
+  const plotHeight = chartHeight - paddingTop - paddingBottom;
+
+  const yAxisTicks = (maxValue, count = 4) =>
+    Array.from({ length: count + 1 }, (_, i) => Math.round((maxValue / count) * i));
+
+  function niceNumber(value, roundUp) {
+    if (value === 0) return 0;
+    const exponent = Math.floor(Math.log10(value));
+    const fraction = value / Math.pow(10, exponent);
+    let niceFraction;
+    if (roundUp) {
+      if (fraction <= 1) niceFraction = 1;
+      else if (fraction <= 2) niceFraction = 2;
+      else if (fraction <= 5) niceFraction = 5;
+      else niceFraction = 10;
+    } else {
+      if (fraction < 1.5) niceFraction = 1;
+      else if (fraction < 3) niceFraction = 2;
+      else if (fraction < 7) niceFraction = 5;
+      else niceFraction = 10;
+    }
+    return niceFraction * Math.pow(10, exponent);
+  }
+
+  function niceAxisTicks(maxValue, tickCountTarget = 4) {
+    if (maxValue <= 0) return { ticks: [0], niceMax: 1 };
+    const niceMax = niceNumber(maxValue, true);
+    const niceStep = niceNumber(niceMax / tickCountTarget, false);
+    const ticks = [];
+    for (let t = 0; t <= niceMax + niceStep * 0.001; t += niceStep) {
+      ticks.push(Math.round(t));
+    }
+    return { ticks, niceMax };
+  }
+
+  const { ticks: rekapYTicks, niceMax: rekapNiceMax } = niceAxisTicks(analytics.maxRekap);
+
   const points = analytics.rekapPeriode.map((d, i) => {
     const x = analytics.rekapPeriode.length > 1
-      ? padding + (i / (analytics.rekapPeriode.length - 1)) * (chartWidth - padding * 2)
-      : chartWidth / 2;
-    const y = chartHeight - padding - (d.total / analytics.maxRekap) * (chartHeight - padding * 2);
+      ? paddingLeft + (i / (analytics.rekapPeriode.length - 1)) * plotWidth
+      : paddingLeft + plotWidth / 2;
+    const y = paddingTop + plotHeight - (d.total / rekapNiceMax) * plotHeight;
     return { x, y, ...d };
   });
   const polylinePoints = points.map((p) => `${p.x},${p.y}`).join(' ');
+
+  const barChartWidth = 600;
+  const barChartHeight = 180;
+  const barPaddingLeft = 40;
+  const barPaddingRight = 16;
+  const barPaddingTop = 12;
+  const barPaddingBottom = 24;
+  const barGap = 3;
+  const barPlotWidth = barChartWidth - barPaddingLeft - barPaddingRight;
+  const barPlotHeight = barChartHeight - barPaddingTop - barPaddingBottom;
+  const barWidth = barPlotWidth / 24 - barGap;
+  const perJamYTicks = yAxisTicks(analytics.maxPerJam, Math.min(4, analytics.maxPerJam || 1));
 
   const handlePrint = () => window.print();
 
@@ -190,6 +263,25 @@ function LaporanPenjualanPage() {
             <p style={{ color: 'var(--text-secondary)' }}>Belum ada transaksi selesai.</p>
           ) : (
             <svg viewBox={`0 0 ${chartWidth} ${chartHeight + 24}`} style={{ width: '100%', maxWidth: 700 }}>
+              {rekapYTicks.map((tick) => {
+                const y = paddingTop + plotHeight - (tick / rekapNiceMax) * plotHeight;
+                return (
+                  <g key={tick}>
+                    <line
+                      x1={paddingLeft} x2={chartWidth - paddingRight} y1={y} y2={y}
+                      style={{ stroke: 'var(--border)' }} strokeWidth="1"
+                    />
+                    <text
+                      x={paddingLeft - 8} y={y}
+                      fontSize="10" textAnchor="end" dominantBaseline="middle"
+                      style={{ fill: 'var(--text-secondary)' }}
+                    >
+                      {formatRupiah(tick)}
+                    </text>
+                  </g>
+                );
+              })}
+
               <polyline points={polylinePoints} fill="none" style={{ stroke: 'var(--accent)' }} strokeWidth="2" />
               {points.map((p) => (
                 <g key={p.label + p.sortValue}>
@@ -209,6 +301,71 @@ function LaporanPenjualanPage() {
               ))}
             </svg>
           )}
+          <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 8, marginBottom: 0 }}>
+            Sumbu Y: total pendapatan per {PERIODE_LABEL[periode].toLowerCase()}.
+          </p>
+        </Card>
+
+        <Card className="report-section">
+          <h4 style={{ marginTop: 0 }}>Penjualan per Jam</h4>
+          {analytics.totalTransaksiSelesai === 0 ? (
+            <p style={{ color: 'var(--text-secondary)' }}>Belum ada transaksi selesai.</p>
+          ) : (
+            <svg viewBox={`0 0 ${barChartWidth} ${barChartHeight}`} style={{ width: '100%', maxWidth: 700 }}>
+              {perJamYTicks.map((tick) => {
+                const y = barPaddingTop + barPlotHeight - (tick / analytics.maxPerJam) * barPlotHeight;
+                return (
+                  <g key={tick}>
+                    <line
+                      x1={barPaddingLeft} x2={barChartWidth - barPaddingRight} y1={y} y2={y}
+                      style={{ stroke: 'var(--border)' }} strokeWidth="1"
+                    />
+                    <text
+                      x={barPaddingLeft - 8} y={y}
+                      fontSize="10" textAnchor="end" dominantBaseline="middle"
+                      style={{ fill: 'var(--text-secondary)' }}
+                    >
+                      {tick}
+                    </text>
+                  </g>
+                );
+              })}
+
+              {analytics.perJam.map((j, i) => {
+                const barHeight = (j.jumlahTransaksi / analytics.maxPerJam) * barPlotHeight;
+                const x = barPaddingLeft + i * (barWidth + barGap);
+                const y = barPaddingTop + barPlotHeight - barHeight;
+                return (
+                  <g key={j.jam}>
+                    <rect
+                      x={x}
+                      y={y}
+                      width={barWidth}
+                      height={barHeight}
+                      rx="2"
+                      style={{ fill: j.jumlahTransaksi > 0 ? 'var(--accent)' : 'var(--border)' }}
+                    >
+                      <title>{`Jam ${String(j.jam).padStart(2, '0')}:00 — ${j.jumlahTransaksi} transaksi, ${formatRupiah(j.total)}`}</title>
+                    </rect>
+                    {i % 3 === 0 && (
+                      <text
+                        x={x + barWidth / 2}
+                        y={barChartHeight - 8}
+                        fontSize="9"
+                        textAnchor="middle"
+                        style={{ fill: 'var(--text-secondary)' }}
+                      >
+                        {j.jam}
+                      </text>
+                    )}
+                  </g>
+                );
+              })}
+            </svg>
+          )}
+          <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 8, marginBottom: 0 }}>
+            Sumbu Y: jumlah transaksi selesai per jam (0–23) — hari ini, {new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}.
+          </p>
         </Card>
 
         <Card className="report-section">

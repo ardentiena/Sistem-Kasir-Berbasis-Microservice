@@ -76,10 +76,14 @@ function KasirLayout() {
                 </div>
             </aside>
 
-            <main className="content">
-                <section className="page">
-                    <CabangSelector />
-                    <Outlet />
+            <main className="content kasir-content">
+                <section className="page kasir-page">
+                    <div className="kasir-page-fixed">
+                        <CabangSelector />
+                    </div>
+                    <div className="kasir-page-body">
+                        <Outlet />
+                    </div>
                 </section>
             </main>
         </div>

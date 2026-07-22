@@ -49,6 +49,9 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @Column(name = "harus_ganti_password", nullable = false)
+    private Boolean harusGantiPassword;
+
     @ManyToOne
     @JoinColumn(name = "kodeCabang")
     private Cabang cabang;

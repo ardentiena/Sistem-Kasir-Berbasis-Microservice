@@ -1,0 +1,83 @@
+:root {
+  /* Page background */
+  --bg: #F4F6F9;
+  --bg-secondary: #EEF1F6;
+  --bg-hover: #F5F8FE;
+
+  /* Surfaces (solid panels/cards) */
+  --surface: #FFFFFF;
+  --surface-solid: #FFFFFF;
+  --blur: none;
+
+  /* Sidebar (dark navy, like the reference dashboard) */
+  --sidebar-bg: #171C2B;
+  --sidebar-bg-active: #232A3D;
+  --sidebar-border: rgba(255, 255, 255, 0.06);
+  --sidebar-text: #AEB4C4;
+  --sidebar-text-muted: #6B7282;
+  --sidebar-text-active: #FFFFFF;
+
+  /* Borders */
+  --border: #E6E9EF;
+  --border-strong: #D6DAE3;
+
+  /* Text */
+  --text: #1B1F2A;
+  --text-secondary: #6B7282;
+  --text-muted: #9AA0AC;
+  --text-on-accent: #FFFFFF;
+
+  /* Accent (primary blue) */
+  --accent: #3762E4;
+  --accent-hover: #2C50C4;
+  --accent-bg: rgba(55, 98, 228, 0.1);
+  --accent-border: rgba(55, 98, 228, 0.35);
+
+  /* Secondary accent (teal) */
+  --teal: #14B8A6;
+  --teal-bg: rgba(20, 184, 166, 0.12);
+
+  /* Status colors */
+  --danger: #E5484D;
+  --danger-hover: #CE3F44;
+  --danger-bg: rgba(229, 72, 77, 0.1);
+  --success: #22A35A;
+  --success-hover: #1C8B4C;
+  --success-bg: rgba(34, 163, 90, 0.12);
+  --warning: #F5A623;
+  --warning-bg: rgba(245, 166, 35, 0.14);
+  --info: #6B7282;
+  --info-bg: rgba(107, 114, 130, 0.1);
+
+  --dot-red: #FF5F57;
+  --dot-yellow: #FEBC2E;
+  --dot-green: #28C840;
+
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 16px;
+
+  --shadow-sm: 0 1px 2px rgba(16,24,40,.04), 0 1px 3px rgba(16,24,40,.06);
+  --shadow: 0 4px 12px rgba(16,24,40,.08), 0 1px 3px rgba(16,24,40,.05);
+  --shadow-lg: 0 12px 28px rgba(16,24,40,.12), 0 2px 8px rgba(16,24,40,.06);
+
+  --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: var(--accent-bg); color: var(--accent); }
+
+.window-dots { display: inline-flex; gap: 8px; align-items: center; }
+.window-dots span { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+.window-dots span:nth-child(1) { background: var(--dot-red); }
+.window-dots span:nth-child(2) { background: var(--dot-yellow); }
+.window-dots span:nth-child(3) { background: var(--dot-green); }

@@ -1,0 +1,16 @@
+/* Layout/theme for .stat-card itself lives in styles/layout.css.
+   This file only covers the smaller sub-elements. */
+
+.stat-card-icon {
+  font-size: 22px;
+}
+
+.stat-card-value {
+  font-size: 21px;
+  font-weight: 600;
+}
+
+.stat-card-title {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}

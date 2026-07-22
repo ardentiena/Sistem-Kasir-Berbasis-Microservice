@@ -54,4 +54,10 @@ public class UserController {
     public ResponseEntity<String> deleteUser(@PathVariable String kodePegawai){
         return ResponseEntity.ok(userService.deleteUser(kodePegawai));
     }
+
+    @PutMapping("/auth/ganti-password")
+    public ResponseEntity<String> gantiPassword(@RequestBody SetPasswordDTO dto) {
+        userService.gantiPassword(dto);
+        return ResponseEntity.ok("Password berhasil diperbarui");
+    }
 }

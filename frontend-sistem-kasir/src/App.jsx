@@ -17,12 +17,20 @@ import LaporanPenjualanPage from './pages/admin/LaporanPenjualanPage';
 import SettingsPage from './pages/admin/SettingsPage';
 import DashboardPage from './pages/admin/DashboardPage';
 import ProfilPage from './pages/ProfilPage';
+import GantiPasswordPage from './pages/GantiPasswordPage';
+import CabangPage from './pages/admin/CabangPage';
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/ganti-password" element={
+            <ProtectedRoute>
+              <GantiPasswordPage />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="/"
@@ -54,6 +62,7 @@ function App() {
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="kasir" element={<KasirPage />} />
           <Route path="produk" element={<ProdukAdminPage />} />
+          <Route path="cabang" element={<CabangPage />} />
           <Route path="transaksi" element={<TransaksiListPage />} />
           <Route path="pembayaran" element={<PembayaranListPage />} />
           <Route path="laporan" element={<LaporanPenjualanPage />} />

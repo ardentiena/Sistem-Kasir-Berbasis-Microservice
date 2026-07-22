@@ -13,10 +13,12 @@ export const login = async (credentials) => {
     localStorage.setItem('role', payload.role);
     localStorage.setItem('kodeCabang', payload.kodeCabang || '');
     localStorage.setItem('email', payload.email || payload.sub || payload.username || '');
+    localStorage.setItem('harusGantiPassword', payload.harusGantiPassword ? 'true' : 'false');
   } catch {
     localStorage.removeItem('role');
     localStorage.removeItem('kodeCabang');
     localStorage.removeItem('email');
+    localStorage.removeItem('harusGantiPassword');
   }
 
   return token;
@@ -27,7 +29,11 @@ export const logout = () => {
   localStorage.removeItem('role');
   localStorage.removeItem('kodeCabang');
   localStorage.removeItem('email');
+  localStorage.removeItem('harusGantiPassword');
 };
+
+export const gantiPassword = (passwordBaru) =>
+  userClient.put('/api/auth/ganti-password', { passwordBaru });
 
 export const assignUserToCabang = (data) => userClient.post('/api/users/assign', data);
 export const getAllUser = () => userClient.get('/api/users');

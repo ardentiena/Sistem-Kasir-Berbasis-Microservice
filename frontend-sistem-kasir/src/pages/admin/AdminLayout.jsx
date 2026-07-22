@@ -62,6 +62,11 @@ const icons = {
             <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.7 21a2 2 0 0 1-3.4 0" />
         </svg>
     ),
+    cabang: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 21h18" /><path d="M5 21V7l7-4 7 4v14" /><path d="M9 21v-6h6v6" /><path d="M9 9h.01M15 9h.01M9 13h.01M15 13h.01" />
+        </svg>
+    ),
 };
 
 function AdminLayout() {
@@ -87,6 +92,7 @@ function AdminLayout() {
                     <nav>
                         <NavLink to="/admin/dashboard">{icons.dashboard}<span>Dashboard</span></NavLink>
                         <NavLink to="/admin/produk">{icons.produk}<span>Produk</span></NavLink>
+                        <NavLink to="/admin/cabang">{icons.cabang}<span>Cabang</span></NavLink>
                         <NavLink to="/admin/kasir">{icons.kasir}<span>Kasir</span></NavLink>
                         <NavLink to="/admin/transaksi">{icons.transaksi}<span>Transaksi</span></NavLink>
                         <NavLink to="/admin/pembayaran">{icons.pembayaran}<span>Pembayaran</span></NavLink>

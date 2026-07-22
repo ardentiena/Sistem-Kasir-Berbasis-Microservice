@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import Card from '../../components/common/Card';
+import PageTitle from '../../components/common/PageTitle';
+import Button from '../../components/common/Button';
 
 const PERIODE_OPTIONS = [
   { value: 'harian', label: 'Harian' },
@@ -21,30 +24,29 @@ function SettingsPage() {
 
   return (
     <div>
-      <h2>Pengaturan</h2>
+      <PageTitle title="Pengaturan" subtitle="Preferensi umum aplikasi" />
 
-      <div style={{ marginTop: 16, maxWidth: 320 }}>
-        <label>
+      <Card style={{ maxWidth: 360 }}>
+        <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           Periode Rekap Laporan Penjualan (default)
           <select
             value={periode}
             onChange={(e) => setPeriode(e.target.value)}
-            style={{ display: 'block', width: '100%', padding: 8, marginTop: 4 }}
           >
             {PERIODE_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}
           </select>
         </label>
-        <p style={{ fontSize: 12, color: '#888', marginTop: 4 }}>
+        <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 8 }}>
           Menentukan bagaimana grafik pendapatan di halaman Laporan Penjualan dikelompokkan secara default.
         </p>
 
-        <button onClick={handleSave} style={{ marginTop: 12 }}>
-          Simpan
-        </button>
-        {saved && <span style={{ marginLeft: 8, color: 'lightgreen' }}>Tersimpan</span>}
-      </div>
+        <div className="form-actions">
+          <Button onClick={handleSave}>Simpan</Button>
+          {saved && <span className="badge badge-success">Tersimpan</span>}
+        </div>
+      </Card>
     </div>
   );
 }

@@ -12,9 +12,11 @@ export const login = async (credentials) => {
     const payload = decodeJwt(token);
     localStorage.setItem('role', payload.role);
     localStorage.setItem('kodeCabang', payload.kodeCabang || '');
+    localStorage.setItem('email', payload.email || payload.sub || payload.username || '');
   } catch {
     localStorage.removeItem('role');
     localStorage.removeItem('kodeCabang');
+    localStorage.removeItem('email');
   }
 
   return token;
@@ -24,6 +26,7 @@ export const logout = () => {
   localStorage.removeItem('token');
   localStorage.removeItem('role');
   localStorage.removeItem('kodeCabang');
+  localStorage.removeItem('email');
 };
 
 export const assignUserToCabang = (data) => userClient.post('/api/users/assign', data);

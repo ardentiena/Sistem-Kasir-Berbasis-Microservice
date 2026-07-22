@@ -9,8 +9,11 @@
   flex-direction: column;
   justify-content: space-between;
   padding: 20px 14px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
 }
-
 .sidebar-logo {
   display: flex;
   align-items: center;
@@ -61,9 +64,28 @@
   transition: background .15s, color .15s, transform .1s;
   text-align: left;
 }
+.sidebar-bottom button svg {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+}
 .sidebar-bottom button:active { transform: scale(0.97); }
-.sidebar-bottom button:first-child:hover { background: rgba(255,255,255,0.06); color: #fff; }
-.sidebar-bottom button:last-child:hover { background: var(--danger-bg); color: var(--danger); }
+.sidebar-bottom button:first-child {
+  opacity: 1;
+  transition: background .15s, color .15s, transform .1s, opacity .15s;
+}
+.sidebar-bottom button:first-child:hover {
+  opacity: 0.9;
+}
+.sidebar-bottom button:last-child {
+  background: var(--danger);
+  color: #fff;
+  border: none;
+}
+.sidebar-bottom button:last-child:hover {
+  background: var(--danger-hover);
+  color: #fff;
+}
 
 .content { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 
@@ -85,6 +107,17 @@
   color: var(--text-muted);
   transition: border-color .15s, background .15s;
 }
+.topbar-search input:not([type="checkbox"]):not([type="radio"]) {
+  border: none;
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.topbar-search input:not([type="checkbox"]):not([type="radio"]):focus {
+  border: none;
+  box-shadow: none;
+}
 .topbar-search:focus-within { border-color: var(--accent-border); background: var(--surface-solid); }
 .topbar-search svg { width: 15px; height: 15px; flex-shrink: 0; color: var(--text-muted); }
 .topbar-search input { border: none; outline: none; background: transparent; font-size: 13.5px; color: var(--text); width: 100%; padding: 0; }
@@ -99,6 +132,28 @@
   color: var(--text-secondary);
   cursor: pointer;
   transition: background .15s, color .15s;
+}
+.header .topbar-icon-btn.topbar-icon-btn {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--surface-solid);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.header .topbar-icon-btn.topbar-icon-btn:hover {
+  background: var(--bg-hover);
+  color: var(--accent);
+}
+.header .topbar-icon-btn svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+  flex-shrink: 0;
 }
 .topbar-icon-btn:hover { background: var(--bg-hover); color: var(--accent); }
 .topbar-icon-btn svg { width: 16px; height: 16px; }

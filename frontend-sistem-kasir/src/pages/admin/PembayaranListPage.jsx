@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { getAllPembayaran } from '../../api/pembayaranService';
 import { getAllTransaksi } from '../../api/transaksiJualService';
 import { useAdminCabang } from '../../context/AdminCabangContext';
+import Card from '../../components/common/Card';
+import PageTitle from '../../components/common/PageTitle';
 
 function formatRupiah(value) {
   return `Rp${Number(value).toLocaleString('id-ID')}`;
@@ -9,6 +11,12 @@ function formatRupiah(value) {
 function formatTanggal(value) {
   return value ? new Date(value).toLocaleString('id-ID') : '-';
 }
+
+const statusBadgeClass = {
+  LUNAS: 'badge-success',
+  PENDING: 'badge-warning',
+  GAGAL: 'badge-danger',
+};
 
 function PembayaranListPage() {
   const { adminKodeCabang } = useAdminCabang();
@@ -37,36 +45,48 @@ function PembayaranListPage() {
     ? pembayaranList.filter((p) => cabangByKodeTransaksi[p.kodeTransaksi] === adminKodeCabang)
     : pembayaranList;
 
-  if (loading) return <p>Memuat pembayaran...</p>;
-  if (error) return <p style={{ color: 'red' }}>Error: {error}</p>;
-
   return (
     <div>
-      <h2>Daftar Pembayaran</h2>
-      <table style={{ width: '100%', marginTop: 16, borderCollapse: 'collapse' }}>
-        <thead>
-          <tr style={{ textAlign: 'left', borderBottom: '1px solid #333' }}>
-            <th>Tanggal Bayar</th>
-            <th>Status</th>
-            <th>Metode</th>
-            <th>Grand Total</th>
-            <th>Jumlah Bayar</th>
-            <th>Kembalian</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredPembayaran.map((p) => (
-            <tr key={p.idDetailPembayaran} style={{ borderBottom: '1px solid #222' }}>
-              <td>{formatTanggal(p.tanggalPembayaran)}</td>
-              <td>{p.status}</td>
-              <td>{p.metodeBayar ?? '-'}</td>
-              <td>{formatRupiah(p.grandTotal)}</td>
-              <td>{p.jumlahBayar != null ? formatRupiah(p.jumlahBayar) : '-'}</td>
-              <td>{p.kembalian != null ? formatRupiah(p.kembalian) : '-'}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <PageTitle title="Daftar Pembayaran" subtitle="Riwayat pembayaran dari setiap transaksi" />
+
+      <Card>
+        {loading && <p>Memuat pembayaran...</p>}
+        {error && <p className="error-message">{error}</p>}
+
+        {!loading && !error && (
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Tanggal Bayar</th>
+                <th>Status</th>
+                <th>Metode</th>
+                <th>Grand Total</th>
+                <th>Jumlah Bayar</th>
+                <th>Kembalian</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredPembayaran.length === 0 && (
+                <tr><td colSpan={6} className="empty-cell">Belum ada pembayaran</td></tr>
+              )}
+              {filteredPembayaran.map((p) => (
+                <tr key={p.idDetailPembayaran}>
+                  <td>{formatTanggal(p.tanggalPembayaran)}</td>
+                  <td>
+                    <span className={`badge ${statusBadgeClass[p.status] || 'badge-neutral'}`}>
+                      {p.status}
+                    </span>
+                  </td>
+                  <td>{p.metodeBayar ?? '-'}</td>
+                  <td>{formatRupiah(p.grandTotal)}</td>
+                  <td>{p.jumlahBayar != null ? formatRupiah(p.jumlahBayar) : '-'}</td>
+                  <td>{p.kembalian != null ? formatRupiah(p.kembalian) : '-'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </Card>
     </div>
   );
 }

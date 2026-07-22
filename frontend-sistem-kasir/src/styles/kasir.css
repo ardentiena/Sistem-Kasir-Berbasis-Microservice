@@ -1,12 +1,13 @@
 .kasir-wrapper {
-  max-width: 1000px;
+  max-width: 1080px;
   margin: 0 auto;
   padding: 24px 16px;
 }
 
 .kasir-topbar {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
   gap: 8px;
   margin-bottom: 16px;
 }
@@ -26,17 +27,19 @@
 .cabang-box {
   margin-bottom: 20px;
   padding: 12px 16px;
-  background: var(--bg);
+  background: var(--surface);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   font-size: 14px;
 }
 
 .cabang-box select {
-  padding: 7px 10px;
+  padding: 6px 10px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  background: var(--bg);
+  background: var(--surface-solid);
   color: var(--text);
   font-size: 14px;
   margin-left: 6px;
@@ -53,16 +56,18 @@
   width: 100%;
   padding: 10px 14px;
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: 999px;
   font-size: 14px;
   margin-bottom: 16px;
-  background: var(--bg);
+  background: var(--surface-solid);
   color: var(--text);
   outline: none;
+  transition: border-color .15s, box-shadow .15s;
 }
 
 .produk-search:focus {
   border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-bg);
 }
 
 .produk-grid {
@@ -72,11 +77,19 @@
 }
 
 .produk-card {
-  background: var(--bg);
+  background: var(--surface);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 16px;
   box-shadow: var(--shadow-sm);
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.produk-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
 }
 
 .produk-card h4 {
@@ -114,11 +127,15 @@
 
 /* Cart */
 .cart-box {
-  background: var(--bg);
+  background: var(--surface);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 16px;
   box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 24px;
 }
 
 .cart-box h3 {
@@ -143,10 +160,11 @@
   height: 26px;
   border: 1px solid var(--border);
   background: var(--bg-secondary);
-  border-radius: var(--radius-sm);
+  border-radius: 50%;
   cursor: pointer;
   font-size: 14px;
   line-height: 1;
+  transition: background .15s;
 }
 
 .cart-qty-btn:hover {
@@ -158,6 +176,7 @@
   padding-top: 12px;
   margin-top: 12px;
   font-size: 15px;
+  font-weight: 600;
 }
 
 .cart-empty {
@@ -167,7 +186,9 @@
 
 /* Checkout */
 .checkout-box {
-  background: var(--bg);
+  background: var(--surface);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 16px;
@@ -201,13 +222,17 @@
 .payment-form input {
   padding: 9px 12px;
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-sm);
   font-size: 14px;
   outline: none;
+  background: var(--surface-solid);
+  color: var(--text);
+  transition: border-color .15s, box-shadow .15s;
 }
 
 .payment-form input:focus {
   border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-bg);
 }
 
 .payment-success {
@@ -216,20 +241,106 @@
   margin-top: 8px;
 }
 
+/* Login yang baru */
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+}
+
+.login-card {
+  width: 380px;
+  max-width: calc(100vw - 32px);
+  background: var(--surface-solid);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 32px 28px;
+}
+
+.login-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.login-logo-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--accent);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.login-card .login-logo-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--accent);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.login-logo h1 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.login-logo span {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+
+.login-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.login-card label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
 /* Login */
 .login-wrapper {
   max-width: 380px;
   margin: 100px auto;
   padding: 32px;
-  background: var(--bg);
+  background: var(--surface);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-lg);
+}
+
+.login-wrapper .window-dots {
+  margin-bottom: 20px;
 }
 
 .login-wrapper h2 {
   margin-bottom: 24px;
-  font-size: 20px;
+  font-size: 19px;
+  font-weight: 600;
   text-align: center;
 }
 
@@ -248,17 +359,154 @@
   width: 100%;
   padding: 10px 12px;
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-sm);
   font-size: 14px;
   outline: none;
+  background: var(--surface-solid);
+  color: var(--text);
+  transition: border-color .15s, box-shadow .15s;
 }
 
 .login-field input:focus {
   border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-bg);
 }
 
 .login-wrapper button[type="submit"] {
   width: 100%;
   padding: 11px;
   margin-top: 4px;
+}
+
+.password-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-field input {
+  width: 100%;
+  padding-right: 40px;
+}
+
+.password-field .password-toggle {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  padding: 6px;
+  cursor: pointer;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+}
+.password-field .password-toggle:hover {
+  color: var(--text-secondary);
+  background: var(--bg-hover);
+}
+.password-field .password-toggle svg {
+  width: 18px;
+  height: 18px;
+}
+
+.kasir-grid {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.kasir-grid > *:first-child {
+  flex: 1;
+  min-width: 280px;
+}
+
+.cart-panel {
+  width: 340px;
+  max-width: 100%;
+  flex-shrink: 0;
+}
+
+.cart-card {
+  background: var(--surface-solid);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 20px;
+  position: sticky;
+  top: 20px;
+  display: flex;
+  flex-direction: column;
+  min-height: 300px;
+}
+
+.cart-card h3 {
+  margin: 0 0 14px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.cart-empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13.5px;
+  min-height: 220px;
+}
+
+.cart-items {
+  display: flex;
+  flex-direction: column;
+}
+
+.cart-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13.5px;
+}
+
+.cart-items .cart-item:last-child {
+  border-bottom: none;
+}
+
+.cart-item-name {
+  flex: 1;
+  font-weight: 500;
+}
+
+.cart-item-price {
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.cart-qty-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-solid);
+  cursor: pointer;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.cart-total {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 15px;
 }

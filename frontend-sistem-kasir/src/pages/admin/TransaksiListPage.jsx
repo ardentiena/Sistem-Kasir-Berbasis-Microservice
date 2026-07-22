@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { getAllTransaksi } from '../../api/transaksiJualService';
 import { useAdminCabang } from '../../context/AdminCabangContext';
+import Card from '../../components/common/Card';
+import PageTitle from '../../components/common/PageTitle';
 
 function formatRupiah(value) {
   return `Rp${Number(value).toLocaleString('id-ID')}`;
@@ -8,6 +10,12 @@ function formatRupiah(value) {
 function formatTanggal(value) {
   return new Date(value).toLocaleString('id-ID');
 }
+
+const statusBadgeClass = {
+  SELESAI: 'badge-success',
+  PENDING: 'badge-warning',
+  DIBATALKAN: 'badge-danger',
+};
 
 function TransaksiListPage() {
   const { adminKodeCabang } = useAdminCabang();
@@ -22,40 +30,52 @@ function TransaksiListPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <p>Memuat transaksi...</p>;
-  if (error) return <p style={{ color: 'red' }}>Error: {error}</p>;
-
   const filteredTransaksi = adminKodeCabang
     ? transaksiList.filter((t) => t.kodeCabang === adminKodeCabang)
     : transaksiList;
 
   return (
     <div>
-      <h2>Daftar Transaksi</h2>
-      <table style={{ width: '100%', marginTop: 16, borderCollapse: 'collapse' }}>
-        <thead>
-          <tr style={{ textAlign: 'left', borderBottom: '1px solid #333' }}>
-            <th>Tanggal</th>
-            <th>Kasir</th>
-            <th>Cabang</th>
-            <th>Status</th>
-            <th>Jumlah Item</th>
-            <th>Grand Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredTransaksi.map((t) => (
-            <tr key={t.id} style={{ borderBottom: '1px solid #222' }}>
-              <td>{formatTanggal(t.createdAt)}</td>
-              <td>{t.kasirEmail}</td>
-              <td>{t.kodeCabang}</td>
-              <td>{t.status}</td>
-              <td>{t.items?.length ?? 0}</td>
-              <td>{formatRupiah(t.grandTotal)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <PageTitle title="Daftar Transaksi" subtitle="Riwayat seluruh transaksi penjualan" />
+
+      <Card>
+        {loading && <p>Memuat transaksi...</p>}
+        {error && <p className="error-message">{error}</p>}
+
+        {!loading && !error && (
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Tanggal</th>
+                <th>Kasir</th>
+                <th>Cabang</th>
+                <th>Status</th>
+                <th>Jumlah Item</th>
+                <th>Grand Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredTransaksi.length === 0 && (
+                <tr><td colSpan={6} className="empty-cell">Belum ada transaksi</td></tr>
+              )}
+              {filteredTransaksi.map((t) => (
+                <tr key={t.id}>
+                  <td>{formatTanggal(t.createdAt)}</td>
+                  <td>{t.kasirEmail}</td>
+                  <td>{t.kodeCabang}</td>
+                  <td>
+                    <span className={`badge ${statusBadgeClass[t.status] || 'badge-neutral'}`}>
+                      {t.status}
+                    </span>
+                  </td>
+                  <td>{t.items?.length ?? 0}</td>
+                  <td>{formatRupiah(t.grandTotal)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </Card>
     </div>
   );
 }

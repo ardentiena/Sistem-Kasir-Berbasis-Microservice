@@ -6,12 +6,11 @@ import {
     deleteProduk
 } from '../../api/daftarProdukService';
 
-import "../../styles/pages.css";
+import "../../styles/Pages.css";
 
 import Button from "../../components/common/Button";
 import Card from "../../components/common/Card";
 import PageTitle from "../../components/common/PageTitle";
-import DataTable from "../../components/common/DataTable";
 
 function formatRupiah(value) {
   return `Rp${Number(value).toLocaleString('id-ID')}`;
@@ -26,7 +25,7 @@ function ProdukAdminPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [search, setSearch] = useState("");
-  
+  const [form, setForm] = useState(emptyForm);
 
   const loadProduk = () => {
     setLoading(true);
@@ -80,9 +79,7 @@ function ProdukAdminPage() {
   };
 
   const filteredProduk = produkList.filter((produk) =>
-    produk.namaProduk
-        .toLowerCase()
-        .includes(search.toLowerCase())
+    produk.namaProduk.toLowerCase().includes(search.toLowerCase())
   );
 
   const handleDelete = async (id) => {
@@ -98,109 +95,110 @@ function ProdukAdminPage() {
 
   return (
     <div>
-      <PageTitle
-    title="Kelola Produk"
-    subtitle="Kelola seluruh data produk"
-/>
+      <PageTitle title="Kelola Produk" subtitle="Kelola seluruh data produk" />
 
-<Card>
+      <Card>
+        <div className="page-toolbar">
+          <input
+            className="search-input"
+            placeholder="Cari produk..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
 
-<div className="page-toolbar">
+          <Button onClick={openCreateForm}>+ Tambah Produk</Button>
+        </div>
 
-    <input
-        className="search-input"
-        placeholder="Cari produk..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-    />
+        {error && (<p className="error-message">{error}</p>)}
 
-    <Button onClick={openCreateForm}>
+        {showForm && (
+          <form onSubmit={handleSubmit} className="form-panel">
+            <h4>{editingId ? 'Edit Produk' : 'Tambah Produk'}</h4>
+            <div className="form-grid">
+              <label>
+                Nama Produk
+                <input
+                  value={form.namaProduk}
+                  onChange={(e) => setForm({ ...form, namaProduk: e.target.value })}
+                  required
+                />
+              </label>
+              <label>
+                Kategori
+                <input
+                  value={form.kategori}
+                  onChange={(e) => setForm({ ...form, kategori: e.target.value })}
+                  required
+                />
+              </label>
+              <label>
+                Harga
+                <input
+                  type="number"
+                  value={form.harga}
+                  onChange={(e) => setForm({ ...form, harga: e.target.value })}
+                  required
+                />
+              </label>
+              <label>
+                Stok
+                <input
+                  type="number"
+                  value={form.stok}
+                  onChange={(e) => setForm({ ...form, stok: e.target.value })}
+                  required
+                />
+              </label>
+            </div>
+            <div className="form-actions">
+              <Button type="submit">{editingId ? 'Simpan Perubahan' : 'Buat Produk'}</Button>
+              <Button type="button" variant="secondary" onClick={() => setShowForm(false)}>
+                Batal
+              </Button>
+            </div>
+          </form>
+        )}
 
-        + Tambah Produk
-
-    </Button>
-
-</div>
-
-      {error && (<p className="error-message">{error}</p>)}
-
-      {showForm && (
-        <form onSubmit={handleSubmit} style={{ border: '1px solid #333', padding: 16, borderRadius: 8, marginTop: 12 }}>
-          <h4>{editingId ? 'Edit Produk' : 'Tambah Produk'}</h4>
-          <div style={{ display: 'grid', gap: 8, maxWidth: 320 }}>
-            <label>
-              Nama Produk
-              <input
-                value={form.namaProduk}
-                onChange={(e) => setForm({ ...form, namaProduk: e.target.value })}
-                required
-              />
-            </label>
-            <label>
-              Kategori
-              <input
-                value={form.kategori}
-                onChange={(e) => setForm({ ...form, kategori: e.target.value })}
-                required
-              />
-            </label>
-            <label>
-              Harga
-              <input
-                type="number"
-                value={form.harga}
-                onChange={(e) => setForm({ ...form, harga: e.target.value })}
-                required
-              />
-            </label>
-            <label>
-              Stok
-              <input
-                type="number"
-                value={form.stok}
-                onChange={(e) => setForm({ ...form, stok: e.target.value })}
-                required
-              />
-            </label>
-          </div>
-          <div style={{ marginTop: 12 }}>
-            <button type="submit">{editingId ? 'Simpan Perubahan' : 'Buat Produk'}</button>
-            <button type="button" onClick={() => setShowForm(false)} style={{ marginLeft: 8 }}>
-              Batal
-            </button>
-          </div>
-        </form>
-      )}
-
-      {loading ? (
-        <p>Memuat...</p>
-      ) : (
-        <table style={{ width: '100%', marginTop: 16, borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ textAlign: 'left', borderBottom: '1px solid #333' }}>
-              <th>Nama</th>
-              <th>Kategori</th>
-              <th>Harga</th>
-              <th>Stok</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredProduk.map((p) => (
-              <tr key={p.id} style={{ borderBottom: '1px solid #222' }}>
-                <td>{p.namaProduk}</td>
-                <td>{p.kategori}</td>
-                <td>{formatRupiah(p.harga)}</td>
-                <td>{p.stok}</td>
-                <td>
-                  <button variant="success" onClick={() => openEditForm(p)}>Edit</button>
-                  <Button variant="danger" onClick={() => handleDelete(p.id)}>Hapus</Button>
-                </td>
+        {loading ? (
+          <p>Memuat...</p>
+        ) : (
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Nama</th>
+                <th>Kategori</th>
+                <th>Harga</th>
+                <th>Stok</th>
+                <th></th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+            </thead>
+            <tbody>
+              {filteredProduk.length === 0 && (
+                <tr><td colSpan={5} className="empty-cell">Tidak ada produk</td></tr>
+              )}
+              {filteredProduk.map((p) => (
+                <tr key={p.id}>
+                  <td>{p.namaProduk}</td>
+                  <td>{p.kategori}</td>
+                  <td>{formatRupiah(p.harga)}</td>
+                  <td>
+                    {Number(p.stok) === 0
+                      ? <span className="badge badge-danger">Habis</span>
+                      : Number(p.stok) <= 10
+                        ? <span className="badge badge-warning">{p.stok} (menipis)</span>
+                        : p.stok}
+                  </td>
+                  <td>
+                    <div className="row-actions">
+                      <Button variant="secondary" onClick={() => openEditForm(p)}>Edit</Button>
+                      <Button variant="danger" onClick={() => handleDelete(p.id)}>Hapus</Button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </Card>
     </div>
   );

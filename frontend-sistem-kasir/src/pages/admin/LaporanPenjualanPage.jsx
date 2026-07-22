@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getAllTransaksi } from '../../api/transaksiJualService';
 import { useAdminCabang } from '../../context/AdminCabangContext';
+import Card from '../../components/common/Card';
+import PageTitle from '../../components/common/PageTitle';
 
 function formatRupiah(value) {
   return `Rp${Number(value).toLocaleString('id-ID')}`;
@@ -12,6 +14,12 @@ const PERIODE_LABEL = {
   mingguan: 'Mingguan',
   bulanan: 'Bulanan',
   tahunan: 'Tahunan',
+};
+
+const statusBadgeClass = {
+  SELESAI: 'badge-success',
+  PENDING: 'badge-warning',
+  DIBATALKAN: 'badge-danger',
 };
 
 function getPeriodeInfo(dateObj, periode) {
@@ -110,7 +118,7 @@ function LaporanPenjualanPage() {
   }, [transaksiList, periode, adminKodeCabang]);
 
   if (loading) return <p>Memuat laporan...</p>;
-  if (error) return <p style={{ color: 'red' }}>Error: {error}</p>;
+  if (error) return <p className="error-message">Error: {error}</p>;
 
   const chartWidth = 600;
   const chartHeight = 160;
@@ -124,92 +132,110 @@ function LaporanPenjualanPage() {
   });
   const polylinePoints = points.map((p) => `${p.x},${p.y}`).join(' ');
 
+  const handlePrint = () => window.print();
+
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-        <h2>Laporan Penjualan</h2>
-        <span style={{ fontSize: 13, color: '#888' }}>
-          Rekap: {PERIODE_LABEL[periode]} — ubah di <Link to="/admin/settings">Pengaturan</Link>
-        </span>
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginTop: 16 }}>
-        <div style={{ border: '1px solid #333', borderRadius: 8, padding: 16 }}>
-          <p style={{ color: '#888', margin: 0 }}>Total Pendapatan</p>
-          <p style={{ fontSize: 24, fontWeight: 'bold', margin: '4px 0' }}>
-            {formatRupiah(analytics.totalPendapatan)}
+      <div className="page-title">
+        <div>
+          <h1>Laporan Penjualan</h1>
+          <p>
+            Rekap: {PERIODE_LABEL[periode]} — ubah di <Link to="/admin/settings">Pengaturan</Link>
           </p>
         </div>
-        <div style={{ border: '1px solid #333', borderRadius: 8, padding: 16 }}>
-          <p style={{ color: '#888', margin: 0 }}>Transaksi Selesai</p>
-          <p style={{ fontSize: 24, fontWeight: 'bold', margin: '4px 0' }}>
-            {analytics.totalTransaksiSelesai}
-          </p>
-        </div>
-        <div style={{ border: '1px solid #333', borderRadius: 8, padding: 16 }}>
-          <p style={{ color: '#888', margin: 0 }}>Rata-rata / Transaksi</p>
-          <p style={{ fontSize: 24, fontWeight: 'bold', margin: '4px 0' }}>
-            {formatRupiah(analytics.rataRataTransaksi)}
-          </p>
-        </div>
+        <button className="btn btn-primary" onClick={handlePrint}>Cetak Laporan</button>
       </div>
 
-      <div style={{ marginTop: 24 }}>
-        <h4>Transaksi per Status</h4>
-        <div style={{ display: 'flex', gap: 12 }}>
-          {Object.entries(analytics.perStatus).map(([status, count]) => (
-            <div key={status} style={{ border: '1px solid #333', borderRadius: 8, padding: '8px 16px' }}>
-              {status}: <strong>{count}</strong>
-            </div>
-          ))}
+      <div className="report-print">
+        <div className="report-print-header">
+          <h2>Laporan Penjualan</h2>
+          <p>Rekap {PERIODE_LABEL[periode]} — dicetak {new Date().toLocaleString('id-ID')}</p>
         </div>
-      </div>
 
-      <div style={{ marginTop: 24 }}>
-        <h4>Pendapatan — Rekap {PERIODE_LABEL[periode]}</h4>
-        {points.length === 0 ? (
-          <p style={{ color: '#888' }}>Belum ada transaksi selesai.</p>
-        ) : (
-          <svg viewBox={`0 0 ${chartWidth} ${chartHeight + 24}`} style={{ width: '100%', maxWidth: 700 }}>
-            <polyline points={polylinePoints} fill="none" stroke="#4f8cff" strokeWidth="2" />
-            {points.map((p) => (
-              <g key={p.label + p.sortValue}>
-                <circle cx={p.x} cy={p.y} r="3.5" fill="#4f8cff">
-                  <title>{`${p.label}: ${formatRupiah(p.total)}`}</title>
-                </circle>
-                <text x={p.x} y={chartHeight + 16} fontSize="10" fill="#888" textAnchor="middle">
-                  {p.label}
-                </text>
-              </g>
+        <div className="report-section" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
+          <div className="card">
+            <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: 12.5 }}>Total Pendapatan</p>
+            <p style={{ fontSize: 24, fontWeight: 600, margin: '6px 0 0' }}>
+              {formatRupiah(analytics.totalPendapatan)}
+            </p>
+          </div>
+          <div className="card">
+            <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: 12.5 }}>Transaksi Selesai</p>
+            <p style={{ fontSize: 24, fontWeight: 600, margin: '6px 0 0' }}>
+              {analytics.totalTransaksiSelesai}
+            </p>
+          </div>
+          <div className="card">
+            <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: 12.5 }}>Rata-rata / Transaksi</p>
+            <p style={{ fontSize: 24, fontWeight: 600, margin: '6px 0 0' }}>
+              {formatRupiah(analytics.rataRataTransaksi)}
+            </p>
+          </div>
+        </div>
+
+        <Card className="report-section">
+          <h4 style={{ marginTop: 0 }}>Transaksi per Status</h4>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            {Object.entries(analytics.perStatus).map(([status, count]) => (
+              <span key={status} className={`badge ${statusBadgeClass[status] || 'badge-neutral'}`}>
+                {status}: {count}
+              </span>
             ))}
-          </svg>
-        )}
-      </div>
+          </div>
+        </Card>
 
-      <div style={{ marginTop: 24 }}>
-        <h4>Produk Terlaris</h4>
-        {analytics.produkTerlaris.length === 0 ? (
-          <p style={{ color: '#888' }}>Belum ada data.</p>
-        ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ textAlign: 'left', borderBottom: '1px solid #333' }}>
-                <th>Produk</th>
-                <th>Terjual</th>
-                <th>Total Pendapatan</th>
-              </tr>
-            </thead>
-            <tbody>
-              {analytics.produkTerlaris.map((p) => (
-                <tr key={p.nama} style={{ borderBottom: '1px solid #222' }}>
-                  <td>{p.nama}</td>
-                  <td>{p.jumlah}</td>
-                  <td>{formatRupiah(p.total)}</td>
-                </tr>
+        <Card className="report-section">
+          <h4 style={{ marginTop: 0 }}>Pendapatan — Rekap {PERIODE_LABEL[periode]}</h4>
+          {points.length === 0 ? (
+            <p style={{ color: 'var(--text-secondary)' }}>Belum ada transaksi selesai.</p>
+          ) : (
+            <svg viewBox={`0 0 ${chartWidth} ${chartHeight + 24}`} style={{ width: '100%', maxWidth: 700 }}>
+              <polyline points={polylinePoints} fill="none" style={{ stroke: 'var(--accent)' }} strokeWidth="2" />
+              {points.map((p) => (
+                <g key={p.label + p.sortValue}>
+                  <circle cx={p.x} cy={p.y} r="3.5" style={{ fill: 'var(--accent)' }}>
+                    <title>{`${p.label}: ${formatRupiah(p.total)}`}</title>
+                  </circle>
+                  <text
+                    x={p.x}
+                    y={chartHeight + 16}
+                    fontSize="10"
+                    style={{ fill: 'var(--text-secondary)' }}
+                    textAnchor="middle"
+                  >
+                    {p.label}
+                  </text>
+                </g>
               ))}
-            </tbody>
-          </table>
-        )}
+            </svg>
+          )}
+        </Card>
+
+        <Card className="report-section">
+          <h4 style={{ marginTop: 0 }}>Produk Terlaris</h4>
+          {analytics.produkTerlaris.length === 0 ? (
+            <p style={{ color: 'var(--text-secondary)' }}>Belum ada data.</p>
+          ) : (
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Produk</th>
+                  <th>Terjual</th>
+                  <th>Total Pendapatan</th>
+                </tr>
+              </thead>
+              <tbody>
+                {analytics.produkTerlaris.map((p) => (
+                  <tr key={p.nama}>
+                    <td>{p.nama}</td>
+                    <td>{p.jumlah}</td>
+                    <td>{formatRupiah(p.total)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </Card>
       </div>
     </div>
   );
